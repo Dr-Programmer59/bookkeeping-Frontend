@@ -204,36 +204,6 @@ export const Upload: React.FC<UploadProps> = ({ onUploadSuccess }) => {
       setUploading(false);
     }
   };
-          {/* Show transactions after upload */}
-          {transactions.length > 0 && (
-            <div className="mt-6">
-              <h3 className="text-lg font-semibold mb-2">Transactions for this upload:</h3>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Vendor</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Auto Category</TableHead>
-                    <TableHead>Manual Category</TableHead>
-                    <TableHead>Approved</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {transactions.map(tx => (
-                    <TableRow key={tx.transaction_id}>
-                      <TableCell>{tx.transaction_date}</TableCell>
-                      <TableCell>{tx.vendor_name}</TableCell>
-                      <TableCell>{tx.amount}</TableCell>
-                      <TableCell>{tx.auto_category}</TableCell>
-                      <TableCell>{tx.manual_category || '-'}</TableCell>
-                      <TableCell>{tx.approved ? 'Yes' : 'No'}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -422,10 +392,41 @@ export const Upload: React.FC<UploadProps> = ({ onUploadSuccess }) => {
               >
                 {(uploading || uploadLoading) ? 'Uploading...' : 'Upload File'}
               </Button>
-                    <div className="loading-shimmer w-4 h-4 rounded mr-2"></div>
+            </div>
           )}
         </CardContent>
       </Card>
+
+      {/* Show transactions after upload */}
+      {transactions.length > 0 && (
+        <div className="mt-6">
+          <h3 className="text-lg font-semibold mb-2">Transactions for this upload:</h3>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Date</TableHead>
+                <TableHead>Vendor</TableHead>
+                <TableHead>Amount</TableHead>
+                <TableHead>Auto Category</TableHead>
+                <TableHead>Manual Category</TableHead>
+                <TableHead>Approved</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {transactions.map(tx => (
+                <TableRow key={tx.transaction_id}>
+                  <TableCell>{tx.transaction_date}</TableCell>
+                  <TableCell>{tx.vendor_name}</TableCell>
+                  <TableCell>{tx.amount}</TableCell>
+                  <TableCell>{tx.auto_category}</TableCell>
+                  <TableCell>{tx.manual_category || '-'}</TableCell>
+                  <TableCell>{tx.approved ? 'Yes' : 'No'}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
 
       {/* Upload History */}
       <Card className="mobile-card hover-lift animate-slide-up" style={{ animationDelay: '0.1s' }}>
