@@ -60,25 +60,27 @@ export const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-secondary/30 p-4">
-      <Card className="w-full max-w-md shadow-lg">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/5 p-4 animate-gradient">
+      <Card className="w-full max-w-md shadow-2xl mobile-card animate-scale-in">
         <CardHeader className="text-center space-y-1">
-          <div className="mx-auto w-12 h-12 bg-primary rounded-xl flex items-center justify-center mb-4">
-            <span className="text-primary-foreground font-bold text-lg">BP</span>
+          <div className="mx-auto w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center mb-6 shadow-xl animate-float">
+            <span className="text-primary-foreground font-bold text-xl">BP</span>
           </div>
-          <CardTitle className="text-2xl font-bold text-foreground">BookKeep Pro</CardTitle>
-          <CardDescription>Sign in to your account</CardDescription>
+          <CardTitle className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary to-primary-hover bg-clip-text text-transparent">
+            BookKeep Pro
+          </CardTitle>
+          <CardDescription className="text-base">Sign in to your account</CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <CardContent className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
-              <Alert variant="destructive">
+              <Alert variant="destructive" className="animate-slide-down">
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
             
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+            <div className="space-y-3">
+              <Label htmlFor="email" className="text-sm font-medium">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -86,11 +88,12 @@ export const Login = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
                 disabled={isLoading}
+                className="mobile-input"
               />
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+            <div className="space-y-3">
+              <Label htmlFor="password" className="text-sm font-medium">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -98,13 +101,18 @@ export const Login = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
                 disabled={isLoading}
+                className="mobile-input"
               />
             </div>
             
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button 
+              type="submit" 
+              className="w-full h-12 text-base font-semibold gradient-primary hover:shadow-lg transition-all duration-300 active:scale-95" 
+              disabled={isLoading}
+            >
               {isLoading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   Signing in...
                 </>
               ) : (
@@ -113,22 +121,22 @@ export const Login = () => {
             </Button>
           </form>
           
-          <div className="mt-4 text-center">
+          <div className="mt-6 text-center">
             <Dialog open={showForgotPassword} onOpenChange={setShowForgotPassword}>
               <DialogTrigger asChild>
-                <Button variant="link" className="text-sm">
+                <Button variant="link" className="text-sm hover:text-primary transition-colors duration-200">
                   Forgot your password?
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="mobile-card">
                 <DialogHeader>
                   <DialogTitle>Reset Password</DialogTitle>
                   <DialogDescription>
                     Enter your email address and we'll send you a reset link.
                   </DialogDescription>
                 </DialogHeader>
-                <form onSubmit={handleForgotPassword} className="space-y-4">
-                  <div className="space-y-2">
+                <form onSubmit={handleForgotPassword} className="space-y-6">
+                  <div className="space-y-3">
                     <Label htmlFor="reset-email">Email</Label>
                     <Input
                       id="reset-email"
@@ -136,9 +144,10 @@ export const Login = () => {
                       value={resetEmail}
                       onChange={(e) => setResetEmail(e.target.value)}
                       placeholder="Enter your email"
+                      className="mobile-input"
                     />
                   </div>
-                  <Button type="submit" className="w-full">
+                  <Button type="submit" className="w-full h-12 gradient-primary">
                     Send Reset Link
                   </Button>
                 </form>
@@ -146,13 +155,13 @@ export const Login = () => {
             </Dialog>
           </div>
           
-          <div className="mt-6 p-4 bg-muted/50 rounded-lg border">
+          <div className="mt-8 p-4 bg-muted/30 rounded-xl border border-muted">
             <p className="text-sm font-medium mb-3 text-foreground">Backend Integration</p>
-            <div className="text-xs space-y-2">
-              <div className="text-muted-foreground">
+            <div className="text-xs space-y-2 text-muted-foreground">
+              <div>
                 Make sure your backend is running and the API_BASE_URL in src/lib/api.ts points to your backend server.
               </div>
-              <div className="text-muted-foreground">
+              <div>
                 Use your backend's registered credentials to login.
               </div>
             </div>

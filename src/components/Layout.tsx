@@ -1,14 +1,16 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, Moon, Sun, Upload, FileText, BarChart3, Settings, ScrollText, Users } from 'lucide-react';
+import { LogOut, Moon, Sun, Upload, FileText, BarChart3, Settings, ScrollText, Users, Menu, X } from 'lucide-react';
 import { useState } from 'react';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 export const Layout = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isDark, setIsDark] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -43,47 +45,57 @@ export const Layout = () => {
   const navItems = user?.role === 'admin' ? adminNavItems : workerNavItems;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/30">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 shadow-sm">
-        <div className="container mx-auto px-4 py-4">
+      <header className="sticky top-0 z-50 border-b glass shadow-lg animate-slide-down">
+        <div className="container mx-auto mobile-container py-3 sm:py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-8">
+            <div className="flex items-center space-x-4 sm:space-x-8">
               <div className="flex items-center space-x-2">
-                <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-                  <span className="text-primary-foreground font-bold text-sm">BP</span>
+                <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl gradient-primary flex items-center justify-center shadow-lg animate-float">
+                  <span className="text-primary-foreground font-bold text-sm sm:text-base">BP</span>
                 </div>
-                <h1 className="text-2xl font-bold text-foreground">BookKeep Pro</h1>
+                <h1 className="text-lg sm:text-2xl font-bold text-foreground bg-gradient-to-r from-primary to-primary-hover bg-clip-text text-transparent">
+                  BookKeep Pro
+                </h1>
               </div>
 
-              <nav className="hidden md:flex space-x-2">
+              {/* Desktop Navigation */}
+              <nav className="hidden lg:flex space-x-1">
                 {navItems.map(({ path, label, icon: Icon }) => (
                   <Button
                     key={path}
                     variant={isActive(path) ? "default" : "ghost"}
                     onClick={() => navigate(path)}
-                    className="flex items-center space-x-2 transition-all duration-200"
+                    className="flex items-center space-x-2 transition-all duration-300 hover-lift relative group"
                     size="sm"
                   >
                     <Icon className="h-4 w-4" />
                     <span>{label}</span>
+                    {isActive(path) && (
+                      <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-primary rounded-full animate-scale-in" />
+                    )}
                   </Button>
                 ))}
               </nav>
             </div>
 
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2 sm:space-x-3">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={toggleTheme}
-                className="h-9 w-9 p-0"
+                className="h-9 w-9 p-0 hover-glow transition-all duration-300"
                 title={isDark ? "Switch to light mode" : "Switch to dark mode"}
               >
-                {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                {isDark ? (
+                  <Sun className="h-4 w-4 animate-bounce-in" />
+                ) : (
+                  <Moon className="h-4 w-4 animate-bounce-in" />
+                )}
               </Button>
 
-              <div className="hidden sm:block text-sm text-right">
+              <div className="hidden md:block text-sm text-right">
                 <div className="font-medium text-foreground">{user?.name}</div>
                 <div className="text-muted-foreground capitalize text-xs">{user?.role}</div>
               </div>
@@ -92,18 +104,63 @@ export const Layout = () => {
                 variant="ghost"
                 size="sm"
                 onClick={handleLogout}
-                className="h-9 w-9 p-0"
+                className="h-9 w-9 p-0 hover:text-destructive transition-all duration-300"
                 title="Sign out"
               >
                 <LogOut className="h-4 w-4" />
               </Button>
+
+              {/* Mobile Menu Button */}
+              <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+                <SheetTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="lg:hidden h-9 w-9 p-0"
+                  >
+                    <Menu className="h-4 w-4" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-80 p-0">
+                  <div className="flex flex-col h-full">
+                    <div className="p-6 border-b">
+                      <div className="flex items-center space-x-3">
+                        <div className="h-10 w-10 rounded-xl gradient-primary flex items-center justify-center shadow-lg">
+                          <span className="text-primary-foreground font-bold">BP</span>
+                        </div>
+                        <div>
+                          <div className="font-semibold text-foreground">{user?.name}</div>
+                          <div className="text-sm text-muted-foreground capitalize">{user?.role}</div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <nav className="flex-1 p-4 space-y-2">
+                      {navItems.map(({ path, label, icon: Icon }) => (
+                        <Button
+                          key={path}
+                          variant={isActive(path) ? "default" : "ghost"}
+                          onClick={() => {
+                            navigate(path);
+                            setMobileMenuOpen(false);
+                          }}
+                          className="w-full justify-start space-x-3 h-12 text-base transition-all duration-300"
+                        >
+                          <Icon className="h-5 w-5" />
+                          <span>{label}</span>
+                        </Button>
+                      ))}
+                    </nav>
+                  </div>
+                </SheetContent>
+              </Sheet>
             </div>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-6 lg:py-8 animate-in">
+      <main className="container mx-auto mobile-container py-4 sm:py-6 lg:py-8 animate-fade-in">
         <Outlet />
       </main>
     </div>

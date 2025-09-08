@@ -266,13 +266,13 @@ export const Upload: React.FC<UploadProps> = ({ onUploadSuccess }) => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* If client not detected, show select */}
       {!detectedClient && clients.length > 0 && (
-        <div className="mb-4">
+        <div className="mb-4 animate-slide-down">
           <Label>Select Client</Label>
           <Select value={manualClient} onValueChange={setManualClient}>
-            <SelectTrigger className="w-64">
+            <SelectTrigger className="w-full sm:w-64 mobile-input">
               <SelectValue placeholder="Select client" />
             </SelectTrigger>
             <SelectContent>
@@ -284,11 +284,11 @@ export const Upload: React.FC<UploadProps> = ({ onUploadSuccess }) => {
         </div>
       )}
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">
+      <div className="animate-fade-in">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-primary to-primary-hover bg-clip-text text-transparent">
           {user?.role === 'admin' ? 'Upload Client Statement' : 'Upload Files'}
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground text-base sm:text-lg mt-2">
           {user?.role === 'admin' 
             ? 'Upload PDF statements for AI parsing and categorization'
             : 'Upload your assigned files for processing'
@@ -297,37 +297,41 @@ export const Upload: React.FC<UploadProps> = ({ onUploadSuccess }) => {
       </div>
 
       {/* Upload Section */}
-      <Card>
+      <Card className="mobile-card hover-lift animate-slide-up">
         <CardHeader>
-          <CardTitle>File Upload</CardTitle>
+          <CardTitle className="flex items-center space-x-2">
+            <div className="w-2 h-6 gradient-primary rounded-full"></div>
+            <span>File Upload</span>
+          </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4 sm:space-y-6">
           {/* Drag and Drop Zone */}
           <div
             className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors ${
               dragActive 
-                ? 'border-primary bg-primary/5' 
-                : 'border-muted-foreground/25 hover:border-primary/50'
+                ? 'border-primary bg-primary/10 animate-pulse' 
+                : 'border-muted-foreground/25 hover:border-primary/50 hover:bg-primary/5'
             }`}
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
             onDragOver={handleDrag}
             onDrop={handleDrop}
           >
-            <div className="mx-auto flex flex-col items-center space-y-4">
-              <div className="rounded-full bg-primary/10 p-6">
-                <UploadIcon className="h-8 w-8 text-primary" />
+            <div className="mx-auto flex flex-col items-center space-y-4 sm:space-y-6">
+              <div className="rounded-full bg-primary/10 p-6 sm:p-8 animate-float">
+                <UploadIcon className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
               </div>
               <div>
-                <p className="text-lg font-medium">
+                <p className="text-base sm:text-lg font-medium">
                   {dragActive ? 'Drop your file here' : 'Drag and drop your PDF file here'}
                 </p>
-                <p className="text-sm text-muted-foreground">or</p>
+                <p className="text-sm sm:text-base text-muted-foreground mt-2">or</p>
               </div>
               <div>
                 <Button
                   variant="outline"
                   type="button"
+                  className="hover-lift"
                   onClick={() => {
                     const input = document.getElementById('file-upload');
                     if (input) (input as HTMLInputElement).click();
@@ -344,7 +348,7 @@ export const Upload: React.FC<UploadProps> = ({ onUploadSuccess }) => {
                   tabIndex={-1}
                 />
               </div>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 PDF files only, max 10MB
               </p>
             </div>
@@ -352,7 +356,7 @@ export const Upload: React.FC<UploadProps> = ({ onUploadSuccess }) => {
 
           {/* Error Messages */}
           {error && (
-            <Alert variant="destructive">
+            <Alert variant="destructive" className="animate-slide-down">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
@@ -360,24 +364,27 @@ export const Upload: React.FC<UploadProps> = ({ onUploadSuccess }) => {
 
           {/* File Preview and Client Selection */}
           {selectedFile && (
-            <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
-              <div>
+            <div className="space-y-4 p-4 sm:p-6 border rounded-xl bg-muted/30 animate-scale-in">
+              <div className="space-y-2">
                 <Label className="text-sm font-medium">Selected File:</Label>
-                <p className="text-sm text-muted-foreground">{selectedFile.name}</p>
+                <p className="text-sm sm:text-base text-muted-foreground font-mono bg-muted/50 p-2 rounded-lg">
+                  {selectedFile.name}
+                </p>
               </div>
 
               {/* Client Auto-Match or Manual Selection */}
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Label className="text-sm font-medium">Client:</Label>
                 {detectedClient ? (
                   <div className="flex items-center space-x-2">
-                    <Badge variant="outline" className="bg-success/10 text-success">
+                    <Badge variant="outline" className="bg-success/10 text-success animate-bounce-in">
                       Auto-detected: {detectedClient}
                     </Badge>
                     {user?.role === 'admin' && (
                       <Button
                         variant="ghost"
                         size="sm"
+                        className="hover:text-warning"
                         onClick={() => {
                           setDetectedClient('');
                           setError('Client auto-detection overridden. Please select manually.');
@@ -390,7 +397,7 @@ export const Upload: React.FC<UploadProps> = ({ onUploadSuccess }) => {
                 ) : (
                   user?.role === 'admin' && (
                     <Select value={manualClient} onValueChange={setManualClient}>
-                      <SelectTrigger>
+                      <SelectTrigger className="mobile-input">
                         <SelectValue placeholder="Select client manually" />
                       </SelectTrigger>
                       <SelectContent>
@@ -411,70 +418,86 @@ export const Upload: React.FC<UploadProps> = ({ onUploadSuccess }) => {
                   uploading || uploadLoading ||
                   (user?.role === 'admin' ? (!detectedClient && !manualClient) : !selectedFile)
                 }
-                className="w-full"
+                className="w-full h-12 text-base font-semibold gradient-primary hover:shadow-lg transition-all duration-300"
               >
                 {(uploading || uploadLoading) ? 'Uploading...' : 'Upload File'}
               </Button>
-            </div>
+                    <div className="loading-shimmer w-4 h-4 rounded mr-2"></div>
           )}
         </CardContent>
       </Card>
 
       {/* Upload History */}
-      <Card>
+      <Card className="mobile-card hover-lift animate-slide-up" style={{ animationDelay: '0.1s' }}>
         <CardHeader>
-          <CardTitle>
+          <CardTitle className="flex items-center space-x-2">
+            <div className="w-2 h-6 gradient-success rounded-full"></div>
+            <span>
             {user?.role === 'admin' ? 'Upload History' : 'My Uploads'}
+            </span>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Filename</TableHead>
-                <TableHead>Client</TableHead>
-                {user?.role === 'admin' && <TableHead>Uploaded By</TableHead>}
-                <TableHead>Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Size</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {uploads.map((upload) => (
-                <TableRow key={upload.upload_id}>
-                  <TableCell className="font-medium">{upload.original_filename}</TableCell>
-                  <TableCell>
-                    {upload.client_id == null
-                      ? '-'
-                      : (typeof upload.client_id === 'object' && !Array.isArray(upload.client_id))
-                        ? ((upload.client_id as any).name || (upload.client_id as any)._id || JSON.stringify(upload.client_id))
-                        : upload.client_id}
-                  </TableCell>
-                  {user?.role === 'admin' && (
-                    <TableCell>
-                      {upload.uploaded_by == null
-                        ? '-'
-                        : (typeof upload.uploaded_by === 'object' && !Array.isArray(upload.uploaded_by))
-                          ? ((upload.uploaded_by as any).email || (upload.uploaded_by as any)._id || JSON.stringify(upload.uploaded_by))
-                          : upload.uploaded_by}
-                    </TableCell>
-                  )}
-                  <TableCell>{new Date(upload.upload_timestamp).toLocaleDateString()}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center space-x-2">
-                      <Badge className={getStatusColor(upload.status)}>
-                        <div className="flex items-center space-x-1">
-                          {getStatusIcon(upload.status)}
-                          <span>{upload.status.replace('_', ' ')}</span>
-                        </div>
-                      </Badge>
-                    </div>
-                  </TableCell>
-                  {/* Removed View Transactions button here */}
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="min-w-[150px]">Filename</TableHead>
+                  <TableHead className="min-w-[100px]">Client</TableHead>
+                  {user?.role === 'admin' && <TableHead className="hidden sm:table-cell min-w-[120px]">Uploaded By</TableHead>}
+                  <TableHead className="min-w-[100px]">Date</TableHead>
+                  <TableHead className="min-w-[100px]">Status</TableHead>
+                  <TableHead className="hidden md:table-cell min-w-[80px]">Size</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {uploads.map((upload) => (
+                  <TableRow key={upload.upload_id} className="hover:bg-muted/50 transition-colors duration-200">
+                    <TableCell className="font-medium">
+                      <div className="flex items-center space-x-2">
+                        <FileText className="h-4 w-4 text-muted-foreground" />
+                        <span className="truncate max-w-[200px]" title={upload.original_filename}>
+                          {upload.original_filename}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {upload.client_id == null
+                        ? '-'
+                        : (typeof upload.client_id === 'object' && !Array.isArray(upload.client_id))
+                          ? ((upload.client_id as any).name || (upload.client_id as any)._id || JSON.stringify(upload.client_id))
+                          : upload.client_id}
+                    </TableCell>
+                    {user?.role === 'admin' && (
+                      <TableCell className="hidden sm:table-cell">
+                        {upload.uploaded_by == null
+                          ? '-'
+                          : (typeof upload.uploaded_by === 'object' && !Array.isArray(upload.uploaded_by))
+                            ? ((upload.uploaded_by as any).email || (upload.uploaded_by as any)._id || JSON.stringify(upload.uploaded_by))
+                            : upload.uploaded_by}
+                      </TableCell>
+                    )}
+                    <TableCell className="text-sm">{new Date(upload.upload_timestamp).toLocaleDateString()}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center space-x-2">
+                        <Badge className={`${getStatusColor(upload.status)} animate-scale-in`}>
+                          <div className="flex items-center space-x-1">
+                            {getStatusIcon(upload.status)}
+                            <span className="hidden sm:inline">{upload.status.replace('_', ' ')}</span>
+                            <span className="sm:hidden">{upload.status.split('_')[0]}</span>
+                          </div>
+                        </Badge>
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell text-sm text-muted-foreground">
+                      {/* Size would go here if available */}
+                      -
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </div>
