@@ -109,11 +109,11 @@ export const Dashboard = () => {
   return (
     <div className="space-y-6 sm:space-y-8">
       {/* Header */}
-      <div className="animate-slide-down">
+      <div>
         <UserManagement/>
       </div>
 
-      <div className="animate-fade-in">
+      <div>
         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-primary to-primary-hover bg-clip-text text-transparent">
           Admin Dashboard
         </h1>
@@ -121,10 +121,10 @@ export const Dashboard = () => {
       </div>
 
       {/* Uploads Section */}
-      <Card className="mobile-card hover-lift animate-slide-up">
+      <Card className="mobile-card hover-glow">
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center space-x-2">
-            <div className="w-2 h-6 gradient-primary rounded-full"></div>
+            <div className="w-1 h-6 bg-primary rounded-full"></div>
             <span>Recent Uploads</span>
           </CardTitle>
         </CardHeader>
@@ -158,7 +158,7 @@ export const Dashboard = () => {
                     <TableCell className="hidden sm:table-cell text-sm">{upload.uploaded_by?.email || upload.uploaded_by || '-'}</TableCell>
                     <TableCell className="text-sm">{upload.upload_timestamp ? new Date(upload.upload_timestamp).toLocaleDateString() : upload.date}</TableCell>
                     <TableCell>
-                      <Badge className={`${getStatusColor(upload.status)} animate-scale-in`}>{upload.status}</Badge>
+                      <Badge className={getStatusColor(upload.status)}>{upload.status}</Badge>
                     </TableCell>
                     <TableCell className="hidden md:table-cell">{upload.transactionCount || upload.transaction_count || '-'}</TableCell>
                     <TableCell>
@@ -166,7 +166,6 @@ export const Dashboard = () => {
                         size="sm" 
                         variant="outline" 
                         onClick={() => navigate(`/transactions?upload_id=${upload.upload_id || upload.id}`)}
-                        className="hover-lift"
                       >
                         View
                       </Button>
@@ -180,10 +179,10 @@ export const Dashboard = () => {
       </Card>
 
       {/* Pending Approvals Section */}
-      <Card className="mobile-card hover-lift animate-slide-up" style={{ animationDelay: '0.1s' }}>
+      <Card className="mobile-card hover-glow">
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center space-x-2">
-            <div className="w-2 h-6 gradient-warning rounded-full"></div>
+            <div className="w-1 h-6 bg-warning rounded-full"></div>
             <span>Pending Approvals</span>
           </CardTitle>
         </CardHeader>
@@ -205,7 +204,7 @@ export const Dashboard = () => {
                     <TableCell className="font-medium">{pa.client?.name || pa.client || '-'}</TableCell>
                     <TableCell>{pa.transactionCount || pa.transaction_count || '-'}</TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="animate-pulse-slow">
+                      <Badge variant="outline">
                         {pa.pendingCount || pa.pending_count || '-'}
                       </Badge>
                     </TableCell>
@@ -218,13 +217,13 @@ export const Dashboard = () => {
       </Card>
 
       {/* Sync History Section */}
-      <Card className="mobile-card hover-lift animate-slide-up" style={{ animationDelay: '0.2s' }}>
+      <Card className="mobile-card hover-glow">
         <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0 pb-4">
           <CardTitle className="flex items-center space-x-2">
-            <div className="w-2 h-6 gradient-success rounded-full"></div>
+            <div className="w-1 h-6 bg-success rounded-full"></div>
             <span>Sync History</span>
           </CardTitle>
-          <Button size="sm" variant="outline" onClick={handleExportCSV} className="hover-lift w-full sm:w-auto">
+          <Button size="sm" variant="outline" onClick={handleExportCSV} className="w-full sm:w-auto">
             <Download className="h-4 w-4 mr-2" /> Export CSV
           </Button>
         </CardHeader>
@@ -254,7 +253,7 @@ export const Dashboard = () => {
                     <TableCell className="font-mono text-xs sm:text-sm">{sync.uploadId || sync.upload_id}</TableCell>
                     <TableCell className="font-medium">{sync.client?.name || sync.client || '-'}</TableCell>
                     <TableCell>
-                      <Badge className={`${getStatusColor(sync.status)} animate-scale-in`}>{sync.status}</Badge>
+                      <Badge className={getStatusColor(sync.status)}>{sync.status}</Badge>
                     </TableCell>
                     <TableCell className="hidden sm:table-cell font-mono text-xs">{sync.responseCode || sync.response_code || '-'}</TableCell>
                     <TableCell className="text-sm">{sync.date ? new Date(sync.date).toLocaleDateString() : '-'}</TableCell>

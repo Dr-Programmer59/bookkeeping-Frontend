@@ -2,64 +2,57 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Enhanced Bookkeeping Platform Design System - Modern Mobile-First Theme */
+/* Professional Bookkeeping Platform Design System - Refined Theme */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 @layer base {
   :root {
-    /* Enhanced Base Colors - Modern Professional Theme */
+    /* Professional Color Palette - Enhanced Contrast */
     --background: 0 0% 100%;
-    --foreground: 215 27% 15%;
+    --foreground: 222 84% 4.9%;
 
     /* Card System with better contrast */
     --card: 0 0% 100%;
-    --card-foreground: 215 27% 15%;
+    --card-foreground: 222 84% 4.9%;
 
     /* Popover System */
     --popover: 0 0% 100%;
-    --popover-foreground: 215 27% 15%;
+    --popover-foreground: 222 84% 4.9%;
 
-    /* Primary - Enhanced Blue with better contrast */
-    --primary: 214 88% 52%;
-    --primary-foreground: 0 0% 100%;
-    --primary-hover: 214 88% 45%;
+    /* Primary - Professional Blue */
+    --primary: 221 83% 53%;
+    --primary-foreground: 210 40% 98%;
+    --primary-hover: 221 83% 45%;
 
-    /* Secondary - Enhanced Grey */
+    /* Secondary - Refined Grey */
     --secondary: 210 40% 96%;
-    --secondary-foreground: 215 27% 15%;
+    --secondary-foreground: 222 84% 4.9%;
 
     /* Muted System with better contrast */
     --muted: 210 40% 96%;
-    --muted-foreground: 215 20% 40%;
+    --muted-foreground: 215 16% 47%;
 
-    /* Accent - Enhanced Success Green */
-    --accent: 142 76% 36%;
+    /* Accent - Professional Teal */
+    --accent: 173 58% 39%;
     --accent-foreground: 0 0% 100%;
 
-    /* Enhanced Status Colors with better contrast */
+    /* Status Colors with better contrast */
     --success: 142 76% 36%;
     --success-foreground: 0 0% 100%;
-    --warning: 32 95% 44%;
+    --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
     /* UI Elements with enhanced contrast */
-    --border: 214 32% 88%;
-    --input: 214 32% 88%;
-    --ring: 214 88% 52%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 221 83% 53%;
 
-    /* Enhanced Professional Shadows */
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
-    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --radius: 0.5rem;
 
-    --radius: 0.75rem;
-
-    /* Enhanced Sidebar Colors */
+    /* Sidebar Colors */
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
@@ -67,56 +60,52 @@
     --sidebar-accent: 240 4.8% 95.9%;
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-
-    /* Animation Variables */
-    --animation-duration: 0.3s;
-    --animation-timing: cubic-bezier(0.4, 0, 0.2, 1);
+    --sidebar-ring: 221 83% 53%;
   }
 
   .dark {
-    /* Enhanced Dark Mode with better contrast */
-    --background: 222 84% 4%;
+    /* Dark Mode with better contrast */
+    --background: 222 84% 4.9%;
     --foreground: 210 40% 98%;
 
-    --card: 222 84% 6%;
+    --card: 222 84% 4.9%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222 84% 6%;
+    --popover: 222 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 214 88% 58%;
-    --primary-foreground: 0 0% 100%;
-    --primary-hover: 214 88% 52%;
+    --primary: 221 83% 53%;
+    --primary-foreground: 210 40% 98%;
+    --primary-hover: 221 83% 45%;
 
-    --secondary: 217 32% 17%;
+    --secondary: 217 32% 17.5%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 217 32% 17%;
-    --muted-foreground: 215 20% 70%;
+    --muted: 217 32% 17.5%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 142 76% 40%;
+    --accent: 173 58% 39%;
     --accent-foreground: 0 0% 100%;
 
-    --success: 142 76% 40%;
+    --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
-    --warning: 32 95% 50%;
+    --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
-    --destructive: 0 84% 65%;
+    --destructive: 0 62% 30%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 217 32% 20%;
-    --input: 217 32% 20%;
-    --ring: 214 88% 58%;
+    --border: 217 32% 17.5%;
+    --input: 217 32% 17.5%;
+    --ring: 221 83% 53%;
 
-    --sidebar-background: 215 28% 15%;
-    --sidebar-foreground: 0 0% 90%;
-    --sidebar-primary: 207 90% 54%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 28% 25%;
-    --sidebar-accent-foreground: 0 0% 90%;
-    --sidebar-border: 215 28% 30%;
-    --sidebar-ring: 207 90% 54%;
+    --sidebar-background: 222 84% 4.9%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 221 83% 53%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 217 32% 17.5%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217 32% 17.5%;
+    --sidebar-ring: 221 83% 53%;
   }
 }
 
@@ -153,79 +142,29 @@
     @apply bg-border/80;
   }
 
-  /* Enhanced focus styles with better contrast */
+  /* Subtle focus styles with better contrast */
   .focus-ring {
     @apply focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background;
   }
 
-  /* Professional animations with mobile optimization */
-  .animate-in {
-    animation: animate-in var(--animation-duration) var(--animation-timing);
-  }
-
-  .animate-out {
-    animation: animate-out var(--animation-duration) var(--animation-timing);
-  }
-
+  /* Reduced animations - more subtle */
   .animate-fade-in {
-    animation: fade-in 0.5s var(--animation-timing);
+    animation: fade-in 0.3s ease-out;
   }
 
   .animate-slide-up {
-    animation: slide-up 0.4s var(--animation-timing);
+    animation: slide-up 0.2s ease-out;
   }
 
   .animate-slide-down {
-    animation: slide-down 0.4s var(--animation-timing);
+    animation: slide-down 0.2s ease-out;
   }
 
   .animate-scale-in {
-    animation: scale-in 0.3s var(--animation-timing);
+    animation: scale-in 0.15s ease-out;
   }
 
-  .animate-bounce-in {
-    animation: bounce-in 0.6s var(--animation-timing);
-  }
-
-  /* Mobile-optimized animations */
-  @media (prefers-reduced-motion: no-preference) {
-    .animate-float {
-      animation: float 3s ease-in-out infinite;
-    }
-
-    .animate-pulse-slow {
-      animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    }
-
-    .animate-gradient {
-      background-size: 200% 200%;
-      animation: gradient 4s ease infinite;
-    }
-  }
-
-  /* Keyframe animations */
-  @keyframes animate-in {
-    from {
-      opacity: 0;
-      transform: translateY(-10px) scale(0.95);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-  }
-
-  @keyframes animate-out {
-    from {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-    to {
-      opacity: 0;
-      transform: translateY(-10px) scale(0.95);
-    }
-  }
-
+  /* Keyframe animations - reduced duration and easing */
   @keyframes fade-in {
     from {
       opacity: 0;
@@ -238,7 +177,7 @@
   @keyframes slide-up {
     from {
       opacity: 0;
-      transform: translateY(20px);
+      transform: translateY(10px);
     }
     to {
       opacity: 1;
@@ -249,7 +188,7 @@
   @keyframes slide-down {
     from {
       opacity: 0;
-      transform: translateY(-20px);
+      transform: translateY(-10px);
     }
     to {
       opacity: 1;
@@ -260,49 +199,11 @@
   @keyframes scale-in {
     from {
       opacity: 0;
-      transform: scale(0.9);
+      transform: scale(0.95);
     }
     to {
       opacity: 1;
       transform: scale(1);
-    }
-  }
-
-  @keyframes bounce-in {
-    0% {
-      opacity: 0;
-      transform: scale(0.3);
-    }
-    50% {
-      transform: scale(1.05);
-    }
-    70% {
-      transform: scale(0.9);
-    }
-    100% {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-
-  @keyframes float {
-    0%, 100% {
-      transform: translateY(0px);
-    }
-    50% {
-      transform: translateY(-10px);
-    }
-  }
-
-  @keyframes gradient {
-    0% {
-      background-position: 0% 50%;
-    }
-    50% {
-      background-position: 100% 50%;
-    }
-    100% {
-      background-position: 0% 50%;
     }
   }
 
@@ -312,23 +213,27 @@
   }
 
   .mobile-card {
-    @apply rounded-xl border bg-card text-card-foreground shadow-lg transition-all duration-300 hover:shadow-xl;
+    @apply rounded-lg border bg-card text-card-foreground shadow-sm transition-shadow duration-200 hover:shadow-md;
   }
 
   .mobile-button {
-    @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-95;
+    @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
   }
 
   .mobile-input {
-    @apply flex h-12 w-full rounded-lg border border-input bg-background px-4 py-3 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200;
+    @apply flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors duration-150;
   }
 
-  /* Enhanced glass morphism effect */
-  .glass {
-    @apply backdrop-blur-md bg-white/80 dark:bg-gray-900/80 border border-white/20 dark:border-gray-700/20;
+  /* Subtle hover effects */
+  .hover-lift {
+    @apply transition-transform duration-150 hover:transform hover:-translate-y-0.5;
   }
 
-  /* Gradient backgrounds */
+  .hover-glow {
+    @apply transition-shadow duration-150 hover:shadow-md;
+  }
+
+  /* Professional gradients */
   .gradient-primary {
     background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary-hover)) 100%);
   }
@@ -338,43 +243,14 @@
   }
 
   .gradient-warning {
-    background: linear-gradient(135deg, hsl(var(--warning)) 0%, hsl(32 95% 38%) 100%);
+    background: linear-gradient(135deg, hsl(var(--warning)) 0%, hsl(38 92% 45%) 100%);
   }
 
   .gradient-destructive {
     background: linear-gradient(135deg, hsl(var(--destructive)) 0%, hsl(0 84% 55%) 100%);
   }
 
-  /* Mobile-optimized text sizes */
-  .text-mobile-xs { font-size: 0.75rem; line-height: 1rem; }
-  .text-mobile-sm { font-size: 0.875rem; line-height: 1.25rem; }
-  .text-mobile-base { font-size: 1rem; line-height: 1.5rem; }
-  .text-mobile-lg { font-size: 1.125rem; line-height: 1.75rem; }
-  .text-mobile-xl { font-size: 1.25rem; line-height: 1.75rem; }
-  .text-mobile-2xl { font-size: 1.5rem; line-height: 2rem; }
-  .text-mobile-3xl { font-size: 1.875rem; line-height: 2.25rem; }
-
-  /* Enhanced hover effects */
-  .hover-lift {
-    @apply transition-all duration-300 hover:transform hover:-translate-y-1 hover:shadow-lg;
-  }
-
-  .hover-glow {
-    @apply transition-all duration-300 hover:shadow-lg hover:shadow-primary/25;
-  }
-
-  /* Mobile-first spacing */
-  .space-mobile-y > * + * {
-    margin-top: 1rem;
-  }
-
-  @media (min-width: 640px) {
-    .space-mobile-y > * + * {
-      margin-top: 1.5rem;
-    }
-  }
-
-  /* Enhanced loading states */
+  /* Loading states with reduced animation */
   .loading-shimmer {
     background: linear-gradient(90deg, 
       hsl(var(--muted)) 25%, 
@@ -382,7 +258,7 @@
       hsl(var(--muted)) 75%
     );
     background-size: 200% 100%;
-    animation: shimmer 2s infinite;
+    animation: shimmer 1.5s infinite;
   }
 
   @keyframes shimmer {
@@ -391,6 +267,17 @@
     }
     100% {
       background-position: 200% 0;
+    }
+  }
+
+  /* Reduced motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
     }
   }
 }

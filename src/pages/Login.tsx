@@ -60,13 +60,13 @@ export const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/5 p-4 animate-gradient">
-      <Card className="w-full max-w-md shadow-2xl mobile-card animate-scale-in">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-md shadow-lg mobile-card">
         <CardHeader className="text-center space-y-1">
-          <div className="mx-auto w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center mb-6 shadow-xl animate-float">
+          <div className="mx-auto w-16 h-16 gradient-primary rounded-lg flex items-center justify-center mb-6 shadow-sm">
             <span className="text-primary-foreground font-bold text-xl">BP</span>
           </div>
-          <CardTitle className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary to-primary-hover bg-clip-text text-transparent">
+          <CardTitle className="text-2xl sm:text-3xl font-bold text-foreground">
             BookKeep Pro
           </CardTitle>
           <CardDescription className="text-base">Sign in to your account</CardDescription>
@@ -74,7 +74,7 @@ export const Login = () => {
         <CardContent className="space-y-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
-              <Alert variant="destructive" className="animate-slide-down">
+              <Alert variant="destructive">
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
@@ -107,7 +107,7 @@ export const Login = () => {
             
             <Button 
               type="submit" 
-              className="w-full h-12 text-base font-semibold gradient-primary hover:shadow-lg transition-all duration-300 active:scale-95" 
+              className="w-full h-12 text-base font-semibold gradient-primary" 
               disabled={isLoading}
             >
               {isLoading ? (
@@ -124,7 +124,7 @@ export const Login = () => {
           <div className="mt-6 text-center">
             <Dialog open={showForgotPassword} onOpenChange={setShowForgotPassword}>
               <DialogTrigger asChild>
-                <Button variant="link" className="text-sm hover:text-primary transition-colors duration-200">
+                <Button variant="link" className="text-sm hover:text-primary transition-colors duration-150">
                   Forgot your password?
                 </Button>
               </DialogTrigger>

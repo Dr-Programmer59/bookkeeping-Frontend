@@ -47,15 +47,15 @@ export const Layout = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/30">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b glass shadow-lg animate-slide-down">
+      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur-sm shadow-sm">
         <div className="container mx-auto mobile-container py-3 sm:py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4 sm:space-x-8">
               <div className="flex items-center space-x-2">
-                <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl gradient-primary flex items-center justify-center shadow-lg animate-float">
+                <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg gradient-primary flex items-center justify-center shadow-sm">
                   <span className="text-primary-foreground font-bold text-sm sm:text-base">BP</span>
                 </div>
-                <h1 className="text-lg sm:text-2xl font-bold text-foreground bg-gradient-to-r from-primary to-primary-hover bg-clip-text text-transparent">
+                <h1 className="text-lg sm:text-2xl font-bold text-foreground">
                   BookKeep Pro
                 </h1>
               </div>
@@ -67,13 +67,13 @@ export const Layout = () => {
                     key={path}
                     variant={isActive(path) ? "default" : "ghost"}
                     onClick={() => navigate(path)}
-                    className="flex items-center space-x-2 transition-all duration-300 hover-lift relative group"
+                    className="flex items-center space-x-2 transition-colors duration-150 relative group"
                     size="sm"
                   >
                     <Icon className="h-4 w-4" />
                     <span>{label}</span>
                     {isActive(path) && (
-                      <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-primary rounded-full animate-scale-in" />
+                      <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
                     )}
                   </Button>
                 ))}
@@ -85,13 +85,13 @@ export const Layout = () => {
                 variant="ghost"
                 size="sm"
                 onClick={toggleTheme}
-                className="h-9 w-9 p-0 hover-glow transition-all duration-300"
+                className="h-9 w-9 p-0 transition-colors duration-150"
                 title={isDark ? "Switch to light mode" : "Switch to dark mode"}
               >
                 {isDark ? (
-                  <Sun className="h-4 w-4 animate-bounce-in" />
+                  <Sun className="h-4 w-4" />
                 ) : (
-                  <Moon className="h-4 w-4 animate-bounce-in" />
+                  <Moon className="h-4 w-4" />
                 )}
               </Button>
 
@@ -104,7 +104,7 @@ export const Layout = () => {
                 variant="ghost"
                 size="sm"
                 onClick={handleLogout}
-                className="h-9 w-9 p-0 hover:text-destructive transition-all duration-300"
+                className="h-9 w-9 p-0 hover:text-destructive transition-colors duration-150"
                 title="Sign out"
               >
                 <LogOut className="h-4 w-4" />
@@ -125,7 +125,7 @@ export const Layout = () => {
                   <div className="flex flex-col h-full">
                     <div className="p-6 border-b">
                       <div className="flex items-center space-x-3">
-                        <div className="h-10 w-10 rounded-xl gradient-primary flex items-center justify-center shadow-lg">
+                        <div className="h-10 w-10 rounded-lg gradient-primary flex items-center justify-center shadow-sm">
                           <span className="text-primary-foreground font-bold">BP</span>
                         </div>
                         <div>
@@ -144,7 +144,7 @@ export const Layout = () => {
                             navigate(path);
                             setMobileMenuOpen(false);
                           }}
-                          className="w-full justify-start space-x-3 h-12 text-base transition-all duration-300"
+                          className="w-full justify-start space-x-3 h-12 text-base transition-colors duration-150"
                         >
                           <Icon className="h-5 w-5" />
                           <span>{label}</span>
@@ -160,7 +160,7 @@ export const Layout = () => {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto mobile-container py-4 sm:py-6 lg:py-8 animate-fade-in">
+      <main className="container mx-auto mobile-container py-4 sm:py-6 lg:py-8">
         <Outlet />
       </main>
     </div>
