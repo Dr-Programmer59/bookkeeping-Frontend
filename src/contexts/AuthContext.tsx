@@ -59,7 +59,9 @@
         return true;
       } catch (error) {
         setIsLoading(false);
-        return false;
+        // If backend is not available, set user to null and continue
+        setUser(null);
+        console.warn('Backend server not available. Please ensure the backend is running.');
       }
     };
 
