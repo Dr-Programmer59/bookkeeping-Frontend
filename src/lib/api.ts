@@ -1,9 +1,6 @@
 // QuickBooks API
 // API Base URL - now from .env
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (
-  // Use HTTPS if the current page is HTTPS, otherwise use HTTP
-  window.location.protocol === 'https:' ? 'https://localhost:4000' : 'http://localhost:4000'
-);
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
 
 export const quickbooksAPI = {
   // Save client app keys (admin-only)
