@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { clientsAPI } from '@/lib/api';
+import { clientsAPI, coaAPI } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -141,21 +141,9 @@ const Clients: React.FC = () => {
       const clientResponse = await clientsAPI.createClient(clientData);
       const clientId = clientResponse.data._id;
       
-      // Then upload the COA
-      const formData = new FormData();
-      formData.append('coa_file', coaFile);
-      
-      const coaResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/coa/${clientId}/upload`, {
-        method: 'POST',
-        body: formData,
-        credentials: 'include'
-      });
-      
-      if (!coaResponse.ok) {
-        throw new Error('COA upload failed');
-      }
-      
-      const coaResult = await coaResponse.json();
+      // Then upload the COA using coaAPI
+      const coaResponse = await coaAPI.uploadCOA(clientId, coaFile);
+      const coaResult = coaResponse.data;
       
       toast({ 
         title: 'Client created successfully',
