@@ -92,13 +92,6 @@ const Clients: React.FC = () => {
     e.preventDefault();
     setError('');
     
-    // For Desktop clients, show COA modal instead of saving immediately
-    if (form.account_type === 'desktop' && !editingId) {
-      setPendingClient(form);
-      setShowCoaModal(true);
-      return;
-    }
-    
     try {
       const clientData = {
         name: form.name,
@@ -114,8 +107,17 @@ const Clients: React.FC = () => {
         await clientsAPI.updateClient(editingId, clientData);
         toast({ title: 'Client updated successfully' });
       } else {
-        await clientsAPI.createClient(clientData);
-        toast({ title: 'Client created successfully' });
+        const clientResponse = await clientsAPI.createClient(clientData);
+        const newClient = clientResponse.data;
+        
+        // For Desktop clients, show COA modal after creation
+        if (form.account_type === 'desktop') {
+          setPendingClient(newClient);
+          setShowCoaModal(true);
+          toast({ title: 'Client created successfully', description: 'Now upload Chart of Accounts' });
+        } else {
+          toast({ title: 'Client created successfully' });
+        }
       }
       
       setForm({ name: '', client_number: '', account_type: 'online', qb_client_id: '', qb_client_secret: '' });
@@ -131,22 +133,12 @@ const Clients: React.FC = () => {
     
     setCoaUploading(true);
     try {
-      // First create the client
-      const clientData = {
-        name: pendingClient.name,
-        client_number: parseInt(pendingClient.client_number),
-        account_type: 'desktop'
-      };
-      
-      const clientResponse = await clientsAPI.createClient(clientData);
-      const clientId = clientResponse.data._id;
-      
-      // Then upload the COA using coaAPI
-      const coaResponse = await coaAPI.uploadCOA(clientId, coaFile);
+      // Upload COA for the already created client
+      const coaResponse = await coaAPI.uploadCOA(pendingClient._id, coaFile);
       const coaResult = coaResponse.data;
       
       toast({ 
-        title: 'Client created successfully',
+        title: 'COA uploaded successfully',
         description: `COA uploaded with ${coaResult.accounts_count} accounts`
       });
       
@@ -159,10 +151,10 @@ const Clients: React.FC = () => {
       fetchClients();
       
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Error creating client with COA');
+      setError(err.response?.data?.message || 'Error uploading COA');
       toast({
         title: 'Error',
-        description: 'Failed to create client or upload COA',
+        description: 'Failed to upload COA',
         variant: 'destructive'
       });
     } finally {
@@ -310,7 +302,7 @@ const Clients: React.FC = () => {
             <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
               <div className="flex items-center space-x-2 text-sm text-gray-600">
                 <FileText className="w-4 h-4" />
-                <span>Chart of Accounts (COA) upload will be required after saving</span>
+                <span>Chart of Accounts (COA) upload will be required after creating the client</span>
               </div>
             </div>
           )}
