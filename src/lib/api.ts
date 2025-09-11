@@ -40,6 +40,33 @@ export const quickbooksAPI = {
     api.post(`/api/qbo/${clientId}/push`, { uploadId, pushAllApproved: true }),
 };
 
+// Export API
+export const exportAPI = {
+  getExportOptions: (clientId: string): Promise<AxiosResponse<any>> =>
+    api.get(`/export/${clientId}/options`),
+
+  exportQBDIIF: (clientId: string, data: {
+    transactionIds?: string[];
+    pushAllApproved?: boolean;
+    registerAccountName: string;
+  }): Promise<AxiosResponse<Blob>> =>
+    api.post(`/export/qbd/${clientId}/iif`, data, {
+      responseType: 'blob',
+    }),
+
+  previewQBDExport: (clientId: string, data: {
+    transactionIds: string[];
+    registerAccountName: string;
+  }): Promise<AxiosResponse<any>> =>
+    api.post(`/export/qbd/${clientId}/preview`, data),
+
+  pushToQBO: (clientId: string, data: {
+    transactionIds?: string[];
+    pushAllApproved?: boolean;
+  }): Promise<AxiosResponse<any>> =>
+    api.post(`/export/qbo/${clientId}/push`, data),
+};
+
 // COA API
 export const coaAPI = {
   uploadCOA: (clientId: string, file: File): Promise<AxiosResponse<COAUploadResponse>> => {
@@ -50,13 +77,13 @@ export const coaAPI = {
     });
   },
 
-  getActiveCOA: (clientId: string): Promise<AxiosResponse<COAResponse>> =>
+  getActiveCOA: (clientId: string): Promise<AxiosResponse<any>> =>
     api.get(`/coa/${clientId}`),
 
-  getCOAAccounts: (clientId: string): Promise<AxiosResponse<COAAccountsResponse>> =>
+  getCOAAccounts: (clientId: string): Promise<AxiosResponse<any>> =>
     api.get(`/coa/${clientId}/accounts`),
 
-  getCOAHistory: (clientId: string): Promise<AxiosResponse<COAHistoryResponse>> =>
+  getCOAHistory: (clientId: string): Promise<AxiosResponse<any>> =>
     api.get(`/coa/${clientId}/history`),
 };
 // Category API
@@ -275,60 +302,8 @@ export const uploadAPI = {
 // Transaction API
 export const transactionAPI = {
   getTransactions: (uploadId: string): Promise<AxiosResponse<Transaction[]>> =>
+  uploadCOA: (clientId: string, file: File): Promise<AxiosResponse<any>> => {
     api.get(`/transactions/${uploadId}`),
-
-  updateTransaction: (
-    transactionId: string,
-    updates: { manual_category?: string; approved?: boolean }
-  ): Promise<AxiosResponse<Transaction>> =>
-    api.patch(`/transactions/${transactionId}`, updates),
-
-  getTransactionsByClient: (clientId: string): Promise<AxiosResponse<Transaction[]>> =>
-    api.get(`/transactions/client/${clientId}`),
-};
-
-// Rules API
-export const rulesAPI = {
-  createRule: (rule: {
-    client_id: string;
-    vendor_contains: string;
-    map_to_account: string;
-  }): Promise<AxiosResponse<Rule>> =>
-    api.post('/rules', rule),
-
-  getRules: (clientId: string): Promise<AxiosResponse<Rule[]>> =>
-    api.get(`/rules/${clientId}`),
-
-  updateRule: (
-    ruleId: string,
-    updates: { vendor_contains?: string; map_to_account?: string; active?: boolean }
-  ): Promise<AxiosResponse<Rule>> =>
-    api.patch(`/rules/${ruleId}`, updates),
-
-  deleteRule: (ruleId: string): Promise<AxiosResponse<void>> =>
-    api.delete(`/rules/${ruleId}`),
-};
-
-// Dashboard API
-export const dashboardAPI = {
-  getUploads: (): Promise<AxiosResponse<any[]>> =>
-    api.get('/dashboard/uploads'),
-
-  getPendingApprovals: (): Promise<AxiosResponse<any[]>> =>
-    api.get('/dashboard/pending-approvals'),
-
-  getSyncHistory: (): Promise<AxiosResponse<any[]>> =>
-    api.get('/dashboard/sync-history'),
-};
-
-// Logs API
-export const logsAPI = {
-  getLogs: (params?: {
-    user?: string;
-    date?: string;
-    action?: string;
-  }): Promise<AxiosResponse<LogEntry[]>> =>
-    api.get('/logs', { params }),
 
   rollback: (uploadId: string): Promise<AxiosResponse<{ message: string }>> =>
     api.post(`/rollback/${uploadId}`),
@@ -336,3 +311,12 @@ export const logsAPI = {
 
 // TokenManager removed; token is managed via cookies
 export default api;
+
+  getClientCOACategories: (clientId: string): Promise<AxiosResponse<any>> =>
+    api.get(`/transactions/client/${clientId}/coa-categories`),
+
+  bulkUpdateTransactions: (data: {
+    transaction_ids: string[];
+    updates: { manual_category?: string; approved?: boolean };
+  }): Promise<AxiosResponse<any>> =>
+    api.patch('/transactions/bulk/update', data),

@@ -42,61 +42,93 @@ export const ClientQuickBooksTab: React.FC<{ clientId: string }> = ({ clientId }
 
   // Save keys
   const handleSaveKeys = async () => {
-    await quickbooksAPI.saveKeys(clientId, keys);
-    toast({ title: 'Keys saved' });
-    fetchStatus();
+    try {
+      await quickbooksAPI.saveKeys(clientId, keys);
+      toast({ title: 'Keys saved' });
+      fetchStatus();
+    } catch (err: any) {
+      toast({ title: 'Error', description: 'Failed to save keys', variant: 'destructive' });
+    }
   };
 
   // Connect
   const handleConnect = () => {
     quickbooksAPI.connect(clientId);
     const t = setInterval(async () => {
-      const r = await quickbooksAPI.getStatus(clientId).then(res => res.data);
-      if (r.connected) {
-        clearInterval(t);
-        setStatus(r);
-        toast({ title: 'QuickBooks Connected' });
+      try {
+        const r = await quickbooksAPI.getStatus(clientId);
+        if (r.data.connected) {
+          clearInterval(t);
+          setStatus(r.data);
+          toast({ title: 'QuickBooks Connected' });
+        }
+      } catch (err) {
+        // Continue polling
       }
     }, 2000);
   };
 
   // Disconnect
   const handleDisconnect = async () => {
-    await quickbooksAPI.disconnect(clientId);
-    setStatus({ connected: false });
-    toast({ title: 'Disconnected from QuickBooks' });
+    try {
+      await quickbooksAPI.disconnect(clientId);
+      setStatus({ connected: false });
+      toast({ title: 'Disconnected from QuickBooks' });
+    } catch (err: any) {
+      toast({ title: 'Error', description: 'Failed to disconnect', variant: 'destructive' });
+    }
   };
 
   // Load CoA
   const handleLoadCoA = async () => {
     setLoadingCoA(true);
-    const coa = await quickbooksAPI.getAccounts(clientId).then(res => res.data);
-    setAccounts(coa);
+    try {
+      const coa = await quickbooksAPI.getAccounts(clientId);
+      setAccounts(coa.data);
+    } catch (err: any) {
+      toast({ title: 'Error', description: 'Failed to load Chart of Accounts', variant: 'destructive' });
+    }
     setLoadingCoA(false);
   };
 
   // Load Register Accounts
   const handleLoadRegisters = async () => {
     setLoadingRegs(true);
-    const regs = await quickbooksAPI.getRegisterAccounts(clientId).then(res => res.data);
-    setRegisters(regs);
+    try {
+      const regs = await quickbooksAPI.getRegisterAccounts(clientId);
+      setRegisters(regs.data);
+    } catch (err: any) {
+      toast({ title: 'Error', description: 'Failed to load register accounts', variant: 'destructive' });
+    }
     setLoadingRegs(false);
   };
 
   // Set Register for Upload (call this after selecting an upload and a register)
   const handleSetRegister = async (uploadId: string, regId: string, regType: string) => {
-    await quickbooksAPI.setRegister(clientId, uploadId, {
-      qbo_register_account_id: regId,
-      qbo_register_account_type: regType,
-    });
-    toast({ title: 'Register account set for upload' });
+    try {
+      await quickbooksAPI.setRegister(clientId, uploadId, {
+        qbo_register_account_id: regId,
+        qbo_register_account_type: regType,
+      });
+      toast({ title: 'Register account set for upload' });
+    } catch (err: any) {
+      toast({ title: 'Error', description: 'Failed to set register account', variant: 'destructive' });
+    }
   };
 
   // Fetch status on mount
-  const fetchStatus = () => {
-    quickbooksAPI.getStatus(clientId).then(res => setStatus(res.data));
+  const fetchStatus = async () => {
+    try {
+      const res = await quickbooksAPI.getStatus(clientId);
+      setStatus(res.data);
+    } catch (err: any) {
+      setStatus({ connected: false });
+    }
   };
-  useEffect(() => { fetchStatus(); }, [clientId]);
+  
+  useEffect(() => { 
+    toast({ title: 'Keys saved' });
+    fetchStatus();
 
   // Helper for relative time
   const relativeTime = (iso: string) => {

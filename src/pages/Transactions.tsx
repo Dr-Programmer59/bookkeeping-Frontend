@@ -29,17 +29,28 @@ export const Transactions: React.FC = () => {
         setPushLoading(false);
         return;
       }
-      const res = await quickbooksAPI.pushAllApproved(selectedClient._id, uploadId);
+      
+      // Use different API based on client type
+      let res;
+      if (selectedClient.account_type === 'online') {
+        res = await exportAPI.pushToQBO(selectedClient._id, { pushAllApproved: true });
+      } else {
+        // For desktop clients, we need to export IIF instead
+        toast({ title: 'Desktop Export', description: 'Use Export to QuickBooks Desktop instead', variant: 'destructive' });
+        setPushLoading(false);
+        return;
+      }
+      
       setPushResults(res.data);
       toast({
         title: 'Push Complete',
-        description: `Pushed: ${res.data.pushed}, Skipped: ${res.data.skipped}, Failed: ${res.data.failed}`,
+        description: `${res.data.transactions_queued} transactions queued for push`,
       });
     } catch (err: any) {
       if (err.response?.status === 401) {
         toast({ title: 'Reconnect to QuickBooks', description: 'Please reconnect and try again.', variant: 'destructive' });
       } else {
-        toast({ title: 'Push Error', description: err.response?.data?.error || 'Error pushing transactions', variant: 'destructive' });
+        toast({ title: 'Push Error', description: err.response?.data?.message || 'Error pushing transactions', variant: 'destructive' });
       }
     }
     setPushLoading(false);
@@ -57,8 +68,21 @@ export const Transactions: React.FC = () => {
 
   // Fetch categories on mount
   useEffect(() => {
-    categoriesAPI.getCategories()
-      .then(res => setCategories(res.data))
+    // For desktop clients, get COA categories; for online clients, get regular categories
+    if (selectedClient?.account_type === 'desktop') {
+      transactionAPI.getClientCOACategories(selectedClient._id)
+        .then(res => setCategories(res.data.categories.map((cat: any) => ({ name: cat.name, _id: cat.id }))))
+        .catch(() => {
+          toast({ title: 'Error', description: 'Failed to load COA categories', variant: 'destructive' });
+        });
+    } else {
+      categoriesAPI.getCategories()
+        .then(res => setCategories(res.data))
+        .catch(() => {
+          toast({ title: 'Error', description: 'Failed to load categories', variant: 'destructive' });
+        });
+    }
+  }, [selectedClient, toast]);
       .catch(() => {
         toast({ title: 'Error', description: 'Failed to load categories', variant: 'destructive' });
       });
