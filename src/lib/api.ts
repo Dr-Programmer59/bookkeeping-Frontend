@@ -1,7 +1,114 @@
-// QuickBooks API
+import axios, { AxiosResponse } from 'axios';
+
 // API Base URL - now from .env
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
 
+// Create axios instance with credentials enabled
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  withCredentials: true, // Always send cookies
+});
+
+// Debug: Log all requests and responses
+api.interceptors.request.use((config) => {
+  // Print cookies before request
+  console.debug('[API] Request:', config.method?.toUpperCase(), config.url);
+  console.debug('[API] Document.cookie:', document.cookie);
+  return config;
+});
+api.interceptors.response.use(
+  (response) => {
+    console.debug('[API] Response:', response.config.url, response.status, response.data);
+    // Print cookies after response
+    console.debug('[API] Document.cookie (after response):', document.cookie);
+    return response;
+  },
+  (error) => {
+    if (error.response) {
+      console.error('[API] Error response:', error.response.config.url, error.response.status, error.response.data);
+    } else {
+      console.error('[API] Error:', error.message);
+    }
+    // Print cookies on error
+    console.debug('[API] Document.cookie (on error):', document.cookie);
+    return Promise.reject(error);
+  }
+);
+
+// API Types
+export interface User {
+  user_id: string;
+  name: string;
+  email: string;
+  role: 'admin' | 'worker';
+  created_at: string;
+}
+
+export interface LoginResponse {
+  access_token: string;
+  refresh_token: string;
+  expires_in: number;
+}
+
+export interface Upload {
+  upload_id: string;
+  client_id: string;
+  original_filename: string;
+  uploaded_by: string;
+  upload_timestamp: string;
+  status: 'pending_parse' | 'processing' | 'completed' | 'failed';
+}
+
+export interface Transaction {
+  transaction_id: string;
+  upload_id: string;
+  transaction_date: string;
+  vendor_name: string;
+  amount: number;
+  payment_type: string;
+  transaction_type: string;
+  auto_category: string;
+  manual_category: string | null;
+  approved: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Rule {
+  rule_id: string;
+  client_id: string;
+  vendor_contains: string;
+  map_to_account: string;
+  created_by: string;
+  created_at: string;
+  active: boolean;
+}
+
+export interface LogEntry {
+  log_id: string;
+  user_id: {
+    _id: string;
+    name: string;
+    email: string;
+    role: string;
+  };
+  action_type: string;
+  target_type: string;
+  target_id: string;
+  timestamp: string;
+}
+
+export interface COAUploadResponse {
+  message: string;
+  coa_id: string;
+  version: number;
+  accounts_count: number;
+}
+
+// QuickBooks API
 export const quickbooksAPI = {
   // Save client app keys (admin-only)
   saveKeys: (clientId: string, keys: { qb_client_id: string; qb_client_secret: string }) =>
@@ -86,6 +193,7 @@ export const coaAPI = {
   getCOAHistory: (clientId: string): Promise<AxiosResponse<any>> =>
     api.get(`/coa/${clientId}/history`),
 };
+
 // Category API
 export interface Category {
   _id: string;
@@ -142,113 +250,6 @@ export const clientsAPI = {
   deleteClient: (id: string): Promise<AxiosResponse<{ message: string }>> =>
     api.delete(`/clients/${id}`),
 };
-import axios, { AxiosResponse } from 'axios';
-
-
-
-// Create axios instance with credentials enabled
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  withCredentials: true, // Always send cookies
-});
-
-// Debug: Log all requests and responses
-api.interceptors.request.use((config) => {
-  // Print cookies before request
-  console.debug('[API] Request:', config.method?.toUpperCase(), config.url);
-  console.debug('[API] Document.cookie:', document.cookie);
-  return config;
-});
-api.interceptors.response.use(
-  (response) => {
-    console.debug('[API] Response:', response.config.url, response.status, response.data);
-    // Print cookies after response
-    console.debug('[API] Document.cookie (after response):', document.cookie);
-    return response;
-  },
-  (error) => {
-    if (error.response) {
-      console.error('[API] Error response:', error.response.config.url, error.response.status, error.response.data);
-    } else {
-      console.error('[API] Error:', error.message);
-    }
-    // Print cookies on error
-    console.debug('[API] Document.cookie (on error):', document.cookie);
-    return Promise.reject(error);
-  }
-);
-
-// Token management is now handled via HTTP-only cookies set by the backend.
-
-// No request interceptor needed for Authorization header. Cookies will be sent automatically with withCredentials: true.
-
-// No response interceptor needed for token refresh. The backend should handle refresh via cookies.
-
-// API Types
-export interface User {
-  user_id: string;
-  name: string;
-  email: string;
-  role: 'admin' | 'worker';
-  created_at: string;
-}
-
-export interface LoginResponse {
-  access_token: string;
-  refresh_token: string;
-  expires_in: number;
-}
-
-export interface Upload {
-  upload_id: string;
-  client_id: string;
-  original_filename: string;
-  uploaded_by: string;
-  upload_timestamp: string;
-  status: 'pending_parse' | 'processing' | 'completed' | 'failed';
-}
-
-export interface Transaction {
-  transaction_id: string;
-  upload_id: string;
-  transaction_date: string;
-  vendor_name: string;
-  amount: number;
-  payment_type: string;
-  transaction_type: string;
-  auto_category: string;
-  manual_category: string | null;
-  approved: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Rule {
-  rule_id: string;
-  client_id: string;
-  vendor_contains: string;
-  map_to_account: string;
-  created_by: string;
-  created_at: string;
-  active: boolean;
-}
-
-export interface LogEntry {
-  log_id: string;
-  user_id: {
-    _id: string;
-    name: string;
-    email: string;
-    role: string;
-  };
-  action_type: string;
-  target_type: string;
-  target_id: string;
-  timestamp: string;
-}
 
 // Auth API
 export const authAPI = {
@@ -302,16 +303,17 @@ export const uploadAPI = {
 // Transaction API
 export const transactionAPI = {
   getTransactions: (uploadId: string): Promise<AxiosResponse<Transaction[]>> =>
-  uploadCOA: (clientId: string, file: File): Promise<AxiosResponse<any>> => {
     api.get(`/transactions/${uploadId}`),
   }
+  getTransactionsByClient: (clientId: string): Promise<AxiosResponse<Transaction[]>> =>
+    api.get(`/transactions/client/${clientId}`),
+
+  updateTransaction: (transactionId: string, data: { manual_category?: string; approved?: boolean }): Promise<AxiosResponse<any>> =>
+    api.patch(`/transactions/${transactionId}`, data),
+
 
   rollback: (uploadId: string): Promise<AxiosResponse<{ message: string }>> =>
     api.post(`/rollback/${uploadId}`),
-};
-
-// TokenManager removed; token is managed via cookies
-export default api;
 
   getClientCOACategories: (clientId: string): Promise<AxiosResponse<any>> =>
     api.get(`/transactions/client/${clientId}/coa-categories`),
@@ -321,3 +323,7 @@ export default api;
     updates: { manual_category?: string; approved?: boolean };
   }): Promise<AxiosResponse<any>> =>
     api.patch('/transactions/bulk/update', data),
+};
+
+// TokenManager removed; token is managed via cookies
+export default api;
