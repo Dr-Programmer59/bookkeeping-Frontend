@@ -325,5 +325,17 @@ export const transactionAPI = {
     api.patch('/transactions/bulk/update', data),
 };
 
+// Dashboard API
+export const dashboardAPI = {
+  getUploads: (): Promise<AxiosResponse<Upload[]>> =>
+    api.get('/uploads'),
+
+  getPendingApprovals: (): Promise<AxiosResponse<any[]>> =>
+    api.get('/dashboard/pending-approvals'),
+
+  getSyncHistory: (): Promise<AxiosResponse<any[]>> =>
+    api.get('/dashboard/sync-history'),
+};
+
 // TokenManager removed; token is managed via cookies
 export default api;
