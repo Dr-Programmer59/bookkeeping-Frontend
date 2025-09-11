@@ -337,5 +337,25 @@ export const dashboardAPI = {
     api.get('/dashboard/sync-history'),
 };
 
+// Rules API
+export const rulesAPI = {
+  getRules: (clientId: string): Promise<AxiosResponse<any>> =>
+    api.get(`/rules/${clientId}`),
+  createRule: (data: {
+    client_id: string;
+    vendor_contains: string;
+    map_to_account: string;
+  }): Promise<AxiosResponse<any>> =>
+    api.post('/rules', data),
+  updateRule: (ruleId: string, data: {
+    vendor_contains?: string;
+    map_to_account?: string;
+    active?: boolean;
+  }): Promise<AxiosResponse<any>> =>
+    api.put(`/rules/${ruleId}`, data),
+  deleteRule: (ruleId: string): Promise<AxiosResponse<{ message: string }>> =>
+    api.delete(`/rules/${ruleId}`),
+};
+
 // TokenManager removed; token is managed via cookies
 export default api;
