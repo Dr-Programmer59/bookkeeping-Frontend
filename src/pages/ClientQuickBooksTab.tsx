@@ -129,6 +129,7 @@ export const ClientQuickBooksTab: React.FC<{ clientId: string }> = ({ clientId }
   useEffect(() => { 
     toast({ title: 'Keys saved' });
     fetchStatus();
+  }, []);
 
   // Helper for relative time
   const relativeTime = (iso: string) => {
