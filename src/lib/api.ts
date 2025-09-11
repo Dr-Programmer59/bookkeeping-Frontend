@@ -61,8 +61,12 @@ export const categoriesAPI = {
 export interface Client {
   _id: string;
   name: string;
-  email: string;
-  phone: string;
+  client_number: number;
+  account_type: 'online' | 'desktop';
+  qb_client_id?: string;
+  qb_client_secret?: string;
+  qb_realm_id?: string;
+  coa_active_version?: string;
   created_at: string;
   created_by: string;
 }
@@ -70,9 +74,23 @@ export interface Client {
 export const clientsAPI = {
   getClients: (): Promise<AxiosResponse<Client[]>> =>
     api.get('/clients'),
-  createClient: (data: { name: string; email: string; phone: string }): Promise<AxiosResponse<Client>> =>
+  createClient: (data: { 
+    name: string; 
+    client_number: number; 
+    account_type: 'online' | 'desktop';
+    qb_client_id?: string;
+    qb_client_secret?: string;
+    qb_realm_id?: string;
+  }): Promise<AxiosResponse<Client>> =>
     api.post('/clients', data),
-  updateClient: (id: string, data: { name: string; email: string; phone: string }): Promise<AxiosResponse<Client>> =>
+  updateClient: (id: string, data: { 
+    name: string; 
+    client_number: number; 
+    account_type: 'online' | 'desktop';
+    qb_client_id?: string;
+    qb_client_secret?: string;
+    qb_realm_id?: string;
+  }): Promise<AxiosResponse<Client>> =>
     api.put(`/clients/${id}`, data),
   deleteClient: (id: string): Promise<AxiosResponse<{ message: string }>> =>
     api.delete(`/clients/${id}`),
