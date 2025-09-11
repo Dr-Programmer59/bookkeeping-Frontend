@@ -304,6 +304,7 @@ export const transactionAPI = {
   getTransactions: (uploadId: string): Promise<AxiosResponse<Transaction[]>> =>
   uploadCOA: (clientId: string, file: File): Promise<AxiosResponse<any>> => {
     api.get(`/transactions/${uploadId}`),
+  }
 
   rollback: (uploadId: string): Promise<AxiosResponse<{ message: string }>> =>
     api.post(`/rollback/${uploadId}`),
