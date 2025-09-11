@@ -60,7 +60,9 @@
       } catch (error) {
         setIsLoading(false);
         // If backend is not available, set user to null and continue
+        // Backend not available - set user to null and continue
         setUser(null);
+        console.warn('Backend server not available. Please ensure the backend is running on the configured port.');
         console.warn('Backend server not available. Please ensure the backend is running.');
       }
     };
@@ -80,7 +82,7 @@
   export const useAuth = () => {
     const context = useContext(AuthContext);
     if (context === undefined) {
-      throw new Error('useAuth must be used within an AuthProvider');
     }
-    return context;
+      console.warn('Login failed. Backend server may not be available. Please ensure the backend is running.');
+      return false;
   };
