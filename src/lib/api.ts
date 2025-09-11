@@ -39,6 +39,26 @@ export const quickbooksAPI = {
   pushAllApproved: (clientId: string, uploadId: string) =>
     api.post(`/api/qbo/${clientId}/push`, { uploadId, pushAllApproved: true }),
 };
+
+// COA API
+export const coaAPI = {
+  uploadCOA: (clientId: string, file: File): Promise<AxiosResponse<COAUploadResponse>> => {
+    const formData = new FormData();
+    formData.append('coa_file', file);
+    return api.post(`/coa/${clientId}/upload`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+
+  getActiveCOA: (clientId: string): Promise<AxiosResponse<COAResponse>> =>
+    api.get(`/coa/${clientId}`),
+
+  getCOAAccounts: (clientId: string): Promise<AxiosResponse<COAAccountsResponse>> =>
+    api.get(`/coa/${clientId}/accounts`),
+
+  getCOAHistory: (clientId: string): Promise<AxiosResponse<COAHistoryResponse>> =>
+    api.get(`/coa/${clientId}/history`),
+};
 // Category API
 export interface Category {
   _id: string;
