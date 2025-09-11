@@ -83,10 +83,6 @@ export const Transactions: React.FC = () => {
         });
     }
   }, [selectedClient, toast]);
-      .catch(() => {
-        toast({ title: 'Error', description: 'Failed to load categories', variant: 'destructive' });
-      });
-  }, []);
 
   // Fetch transactions for selected client
   useEffect(() => {
