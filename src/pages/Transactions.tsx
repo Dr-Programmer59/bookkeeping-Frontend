@@ -29,28 +29,17 @@ export const Transactions: React.FC = () => {
         setPushLoading(false);
         return;
       }
-      
-      // Use different API based on client type
-      let res;
-      if (selectedClient.account_type === 'online') {
-        res = await exportAPI.pushToQBO(selectedClient._id, { pushAllApproved: true });
-      } else {
-        // For desktop clients, we need to export IIF instead
-        toast({ title: 'Desktop Export', description: 'Use Export to QuickBooks Desktop instead', variant: 'destructive' });
-        setPushLoading(false);
-        return;
-      }
-      
+      const res = await quickbooksAPI.pushAllApproved(selectedClient._id, uploadId);
       setPushResults(res.data);
       toast({
         title: 'Push Complete',
-        description: `${res.data.transactions_queued} transactions queued for push`,
+        description: `Pushed: ${res.data.pushed}, Skipped: ${res.data.skipped}, Failed: ${res.data.failed}`,
       });
     } catch (err: any) {
       if (err.response?.status === 401) {
         toast({ title: 'Reconnect to QuickBooks', description: 'Please reconnect and try again.', variant: 'destructive' });
       } else {
-        toast({ title: 'Push Error', description: err.response?.data?.message || 'Error pushing transactions', variant: 'destructive' });
+        toast({ title: 'Push Error', description: err.response?.data?.error || 'Error pushing transactions', variant: 'destructive' });
       }
     }
     setPushLoading(false);
