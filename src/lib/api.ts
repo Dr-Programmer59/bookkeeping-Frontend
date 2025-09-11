@@ -304,7 +304,7 @@ export const uploadAPI = {
 export const transactionAPI = {
   getTransactions: (uploadId: string): Promise<AxiosResponse<Transaction[]>> =>
     api.get(`/transactions/${uploadId}`),
-  }
+
   getTransactionsByClient: (clientId: string): Promise<AxiosResponse<Transaction[]>> =>
     api.get(`/transactions/client/${clientId}`),
 
