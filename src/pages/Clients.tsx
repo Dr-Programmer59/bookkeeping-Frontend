@@ -8,12 +8,13 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '../contexts/AuthContext';
 import { ClientQuickBooksTab } from './ClientQuickBooksTab';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, FileText, AlertCircle, CheckCircle } from 'lucide-react';
+import { Upload, FileText, AlertCircle, CheckCircle, RotateCcw } from 'lucide-react';
 
 const Clients: React.FC = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [clients, setClients] = useState<any[]>([]);
+  const [coaStatuses, setCoaStatuses] = useState<{[clientId: string]: any}>({});
   const [form, setForm] = useState({ 
     name: '', 
     client_number: '', 
@@ -38,10 +39,47 @@ const Clients: React.FC = () => {
     try {
       const res = await clientsAPI.getClients();
       setClients(res.data);
+      
+      // Fetch COA statuses for desktop clients
+      await fetchCoaStatuses(res.data);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to fetch clients');
     }
     setLoading(false);
+  };
+
+  const refreshCoaStatus = async (clientId: string) => {
+    try {
+      const statusRes = await coaAPI.getCOAStatus(clientId);
+      setCoaStatuses(prev => ({
+        ...prev,
+        [clientId]: statusRes.data
+      }));
+    } catch (err) {
+      console.warn(`Failed to refresh COA status for client ${clientId}:`, err);
+    }
+  };
+
+  const fetchCoaStatuses = async (clientsList: any[]) => {
+    const desktopClients = clientsList.filter(client => client.account_type === 'desktop');
+    
+    const statusPromises = desktopClients.map(async (client) => {
+      try {
+        const statusRes = await coaAPI.getCOAStatus(client._id);
+        return { clientId: client._id, status: statusRes.data };
+      } catch (err) {
+        console.warn(`Failed to fetch COA status for client ${client._id}:`, err);
+        return { clientId: client._id, status: { has_csv_uploaded: false, coa_details: null } };
+      }
+    });
+
+    const statuses = await Promise.all(statusPromises);
+    const statusMap = statuses.reduce((acc, { clientId, status }) => {
+      acc[clientId] = status;
+      return acc;
+    }, {} as {[clientId: string]: any});
+
+    setCoaStatuses(statusMap);
   };
 
   useEffect(() => { fetchClients(); }, []);
@@ -96,7 +134,7 @@ const Clients: React.FC = () => {
       const clientData = {
         name: form.name,
         client_number: parseInt(form.client_number),
-        account_type: form.account_type,
+        account_type: form.account_type as 'online' | 'desktop',
         ...(form.account_type === 'online' && {
           qb_client_id: form.qb_client_id,
           qb_client_secret: form.qb_client_secret
@@ -142,13 +180,19 @@ const Clients: React.FC = () => {
         description: `COA uploaded with ${coaResult.accounts_count} accounts`
       });
       
+      // Refresh COA status for this specific client
+      await refreshCoaStatus(pendingClient._id);
+      
       // Reset form and close modal
       setForm({ name: '', client_number: '', account_type: 'online', qb_client_id: '', qb_client_secret: '' });
       setPendingClient(null);
       setShowCoaModal(false);
       setCoaFile(null);
       setCoaPreview([]);
-      fetchClients();
+      // Only refetch clients if it's a new client (not existing)
+      if (!pendingClient.isExisting) {
+        fetchClients();
+      }
       
     } catch (err: any) {
       setError(err.response?.data?.message || 'Error uploading COA');
@@ -206,19 +250,48 @@ const Clients: React.FC = () => {
   };
 
   const getCoaStatusBadge = (client: any) => {
-    if (client.account_type !== 'desktop') return null;
+    if (client.account_type !== 'desktop') {
+      return (
+        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+          QB Online
+        </Badge>
+      );
+    }
     
-    return client.coa_active_version ? (
-      <Badge variant="default" className="bg-green-100 text-green-800">
-        <CheckCircle className="w-3 h-3 mr-1" />
-        COA Active
-      </Badge>
-    ) : (
-      <Badge variant="destructive" className="bg-red-100 text-red-800">
-        <AlertCircle className="w-3 h-3 mr-1" />
-        No COA
-      </Badge>
-    );
+    const coaStatus = coaStatuses[client._id];
+    
+    // Show loading state while fetching COA status
+    if (!coaStatus) {
+      return (
+        <Badge variant="secondary" className="bg-gray-100 text-gray-600">
+          Checking...
+        </Badge>
+      );
+    }
+
+    if (coaStatus.has_csv_uploaded && coaStatus.coa_details) {
+      return (
+        <div className="flex flex-col gap-1">
+          <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">
+            <CheckCircle className="w-3 h-3 mr-1" />
+            COA Uploaded
+          </Badge>
+          <div className="text-xs text-gray-500">
+            {coaStatus.coa_details.filename}
+          </div>
+          <div className="text-xs text-gray-400">
+            {new Date(coaStatus.coa_details.uploaded_at).toLocaleDateString()}
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <Badge variant="destructive" className="bg-red-100 text-red-800 border-red-200">
+          <AlertCircle className="w-3 h-3 mr-1" />
+          No COA
+        </Badge>
+      );
+    }
   };
 
   return (
@@ -396,14 +469,26 @@ const Clients: React.FC = () => {
                           QuickBooks
                         </Button>
                       ) : (
-                        <Button 
-                          size="sm" 
-                          variant="secondary" 
-                          onClick={() => handleCoaUpload(client._id)}
-                        >
-                          <FileText className="w-3 h-3 mr-1" />
-                          {client.coa_active_version ? 'Replace COA' : 'Import COA'}
-                        </Button>
+                        <div className="flex gap-1">
+                          <Button 
+                            size="sm" 
+                            variant={coaStatuses[client._id]?.has_csv_uploaded ? "outline" : "secondary"}
+                            onClick={() => handleCoaUpload(client._id)}
+                          >
+                            <FileText className="w-3 h-3 mr-1" />
+                            {coaStatuses[client._id]?.has_csv_uploaded ? 'Replace COA' : 'Upload COA'}
+                          </Button>
+                          {coaStatuses[client._id]?.has_csv_uploaded && (
+                            <Button 
+                              size="sm" 
+                              variant="ghost" 
+                              onClick={() => refreshCoaStatus(client._id)}
+                              title="Refresh COA Status"
+                            >
+                              <RotateCcw className="w-3 h-3" />
+                            </Button>
+                          )}
+                        </div>
                       )}
                     </div>
                   </TableCell>

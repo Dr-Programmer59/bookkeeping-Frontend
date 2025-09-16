@@ -1,5 +1,6 @@
 import Clients from '@/pages/Clients';
 import Categories from '@/pages/Categories';
+import Export from '@/pages/Export';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -49,6 +50,7 @@ const App = () => (
                   </ProtectedRoute>
                 } />
                 <Route path="transactions" element={<Transactions />} />
+                <Route path="export" element={<Export />} />
                 <Route path="clients" element={
                   <ProtectedRoute allowedRoles={['admin']}>
                     <Clients />

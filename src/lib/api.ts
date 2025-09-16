@@ -14,9 +14,16 @@ const api = axios.create({
 
 // Debug: Log all requests and responses
 api.interceptors.request.use((config) => {
+  // Add Authorization header if token exists
+  const token = localStorage.getItem('access_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  
   // Print cookies before request
   console.debug('[API] Request:', config.method?.toUpperCase(), config.url);
   console.debug('[API] Document.cookie:', document.cookie);
+  console.debug('[API] Authorization header:', config.headers.Authorization ? 'Present' : 'Missing');
   return config;
 });
 api.interceptors.response.use(
@@ -26,12 +33,43 @@ api.interceptors.response.use(
     console.debug('[API] Document.cookie (after response):', document.cookie);
     return response;
   },
-  (error) => {
+  async (error) => {
+    const originalRequest = error.config;
+    
     if (error.response) {
       console.error('[API] Error response:', error.response.config.url, error.response.status, error.response.data);
+      
+      // Handle 401 unauthorized - attempt token refresh
+      if (error.response.status === 401 && !originalRequest._retry) {
+        originalRequest._retry = true;
+        
+        const refreshToken = localStorage.getItem('refresh_token');
+        if (refreshToken) {
+          try {
+            const refreshResponse = await api.post('/auth/refresh', { refresh_token: refreshToken });
+            const newToken = refreshResponse.data.access_token;
+            
+            // Update stored token
+            localStorage.setItem('access_token', newToken);
+            document.cookie = `access_token=${newToken}; path=/; max-age=3600`;
+            
+            // Retry original request with new token
+            originalRequest.headers.Authorization = `Bearer ${newToken}`;
+            return api(originalRequest);
+          } catch (refreshError) {
+            // Refresh failed, redirect to login
+            console.error('[API] Token refresh failed:', refreshError);
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            window.location.href = '/login';
+            return Promise.reject(refreshError);
+          }
+        }
+      }
     } else {
       console.error('[API] Error:', error.message);
     }
+    
     // Print cookies on error
     console.debug('[API] Document.cookie (on error):', document.cookie);
     return Promise.reject(error);
@@ -149,6 +187,47 @@ export const quickbooksAPI = {
 
 // Export API
 export const exportAPI = {
+  // QuickBooks Online Export (per API guide)
+  exportToQBO: (data: {
+    client_id: string;
+    upload_id: string;
+    transaction_ids: string[];
+  }): Promise<AxiosResponse<{
+    message: string;
+    exported_count: number;
+    failed_count: number;
+    qbo_responses: Array<{
+      transaction_id: string;
+      qbo_id: string;
+      status: string;
+    }>;
+  }>> =>
+    api.post('/export/qbo', data),
+
+  // QuickBooks Desktop Export (per API guide)  
+  exportToQBD: (data: {
+    client_id: string;
+    upload_id: string;
+    transaction_ids: string[];
+    export_format: 'journal_entries' | 'bank_transactions';
+  }): Promise<AxiosResponse<{
+    message: string;
+    file_url: string;
+    file_name: string;
+    transactions_count: number;
+  }>> =>
+    api.post('/export/qbd', data),
+
+  // Direct IIF file download for QuickBooks Desktop
+  exportIIFDirect: (clientId: string, data: {
+    transaction_ids: string[];
+    register_account_name: string;
+  }): Promise<AxiosResponse<Blob>> =>
+    api.post(`/export/qbd/${clientId}/iif`, data, {
+      responseType: 'blob',
+    }),
+
+  // Legacy endpoints (keep for backward compatibility)
   getExportOptions: (clientId: string): Promise<AxiosResponse<any>> =>
     api.get(`/export/${clientId}/options`),
 
@@ -192,6 +271,38 @@ export const coaAPI = {
 
   getCOAHistory: (clientId: string): Promise<AxiosResponse<any>> =>
     api.get(`/coa/${clientId}/history`),
+
+  // Check COA upload status for desktop clients
+  getCOAStatus: (clientId: string): Promise<AxiosResponse<{
+    has_csv_uploaded: boolean;
+    coa_details: {
+      coa_id: string;
+      filename: string;
+      uploaded_at: string;
+      version: number;
+      file_exists: boolean;
+    } | null;
+  }>> =>
+    api.get(`/coa/${clientId}/status`),
+
+  // Get COA CSV data content as JSON
+  getCOAData: (clientId: string): Promise<AxiosResponse<{
+    coa_id: string;
+    filename: string;
+    uploaded_at: string;
+    version: number;
+    total_rows: number;
+    headers: string[];
+    data: Array<{
+      "": string;
+      "Accnt. #": string;
+      "Account": string;
+      "Type": string;
+      "Detail Type": string;
+      "Balance": string;
+    }>;
+  }>> =>
+    api.get(`/coa/${clientId}/data`),
 };
 
 // Category API
@@ -327,6 +438,25 @@ export const transactionAPI = {
 
 // Dashboard API
 export const dashboardAPI = {
+  // Unified dashboard data (per API guide)
+  getDashboard: (): Promise<AxiosResponse<{
+    total_clients: number;
+    total_uploads: number;
+    total_transactions: number;
+    categorized_transactions: number;
+    uncategorized_transactions: number;
+    recent_uploads: Array<{
+      _id: string;
+      original_filename: string;
+      client_name: string;
+      upload_date: string;
+      status: string;
+      transactions_count: number;
+    }>;
+  }>> =>
+    api.get('/dashboard'),
+
+  // Legacy endpoints (keep for backward compatibility)
   getUploads: (): Promise<AxiosResponse<Upload[]>> =>
     api.get('/uploads'),
 
@@ -355,6 +485,23 @@ export const rulesAPI = {
     api.put(`/rules/${ruleId}`, data),
   deleteRule: (ruleId: string): Promise<AxiosResponse<{ message: string }>> =>
     api.delete(`/rules/${ruleId}`),
+};
+
+// Utility functions for client workflow detection (per API guide)
+export const getClientWorkflow = (client: Client) => {
+  if (client.account_type === 'online') {
+    return {
+      needsCOA: false,
+      exportMethod: 'qbo',
+      categorySource: 'quickbooks_api'
+    };
+  } else {
+    return {
+      needsCOA: true,
+      exportMethod: 'iif',
+      categorySource: 'uploaded_coa'
+    };
+  }
 };
 
 // TokenManager removed; token is managed via cookies

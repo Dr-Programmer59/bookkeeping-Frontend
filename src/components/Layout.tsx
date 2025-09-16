@@ -1,7 +1,7 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, Moon, Sun, Upload, FileText, BarChart3, Settings, ScrollText, Users, Menu, X } from 'lucide-react';
+import { LogOut, Moon, Sun, Upload, FileText, BarChart3, Settings, ScrollText, Users, Menu, X, Download } from 'lucide-react';
 import { useState } from 'react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
@@ -28,6 +28,7 @@ export const Layout = () => {
     { path: '/dashboard', label: 'Dashboard', icon: BarChart3 },
     { path: '/upload', label: 'Upload', icon: Upload },
     { path: '/transactions', label: 'Transactions', icon: FileText },
+    { path: '/export', label: 'Export', icon: Download },
     { path: '/clients', label: 'Clients', icon: Users },
     // { path: '/categories', label: 'Categories', icon: Settings },
     { path: '/rules', label: 'Rules', icon: Settings },
@@ -37,8 +38,8 @@ export const Layout = () => {
   const workerNavItems = [
     { path: '/upload', label: 'Upload', icon: Upload },
     { path: '/transactions', label: 'Transactions', icon: FileText },
+    { path: '/export', label: 'Export', icon: Download },
     { path: '/logs', label: 'Logs', icon: ScrollText },
-
     { path: '/my-uploads', label: 'My Uploads', icon: FileText },
   ];
 

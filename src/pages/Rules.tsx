@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { rulesAPI, categoriesAPI } from '@/lib/api';
+import { rulesAPI, categoriesAPI, clientsAPI, quickbooksAPI, coaAPI } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit2, Trash2, Search } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, RefreshCw } from 'lucide-react';
 
 interface Rule {
   id: string;
@@ -32,22 +32,42 @@ export const Rules = () => {
   const { user } = useAuth();
   const [rules, setRules] = useState<Rule[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
+  const [clients, setClients] = useState<any[]>([]);
+  const [selectedClient, setSelectedClient] = useState<any | null>(null);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingRule, setEditingRule] = useState<Rule | null>(null);
   const [newRule, setNewRule] = useState({ vendorContains: '', mappedCategory: '' });
   const [loading, setLoading] = useState(true);
 
-  // Fetch rules and categories from backend
+  // Load clients on component mount
   useEffect(() => {
-    if (!user?.user_id) return;
     setLoading(true);
-    Promise.all([
-      rulesAPI.getRules(user.user_id),
-      categoriesAPI.getCategories()
-    ])
-      .then(([rulesRes, catRes]) => {
-        setRules(rulesRes.data.map((r: any) => ({
+    clientsAPI.getClients()
+      .then(res => {
+        setClients(res.data);
+        // Auto-select first client if available
+        if (res.data.length > 0) {
+          setSelectedClient(res.data[0]);
+        }
+      })
+      .catch(() => toast({ title: 'Error', description: 'Failed to load clients', variant: 'destructive' }))
+      .finally(() => setLoading(false));
+  }, []);
+
+  // Load rules and categories when client is selected
+  useEffect(() => {
+    if (!selectedClient) {
+      setRules([]);
+      setCategories([]);
+      return;
+    }
+
+    // Load rules for selected client
+    rulesAPI.getRules(selectedClient._id)
+      .then(res => {
+        setRules(res.data.map((r: any) => ({
           id: r.rule_id,
           vendorContains: r.vendor_contains,
           mappedCategory: r.map_to_account,
@@ -56,11 +76,51 @@ export const Rules = () => {
           enabled: r.active,
           matchCount: r.match_count ?? 0
         })));
-        setCategories(catRes.data.map((c: any) => c.name));
       })
-      .catch(() => toast({ title: 'Error', description: 'Failed to load rules or categories', variant: 'destructive' }))
-      .finally(() => setLoading(false));
-  }, [user]);
+      .catch(() => toast({ title: 'Error', description: 'Failed to load rules', variant: 'destructive' }));
+
+    // Load categories/accounts based on client type
+    loadCategoriesForClient(selectedClient);
+  }, [selectedClient]);
+
+  // Function to load categories based on client type
+  const loadCategoriesForClient = async (client: any) => {
+    setCategoriesLoading(true);
+    try {
+      if (client.account_type === 'online') {
+        // For online clients, get accounts from QuickBooks API
+        const res = await quickbooksAPI.getAccounts(client._id);
+        const qbAccounts = res.data || [];
+        setCategories(qbAccounts.map((account: any) => 
+          account.fullName || account.name
+        ));
+      } else if (client.account_type === 'desktop') {
+        // For desktop clients, get COA data from uploaded CSV
+        const res = await coaAPI.getCOAData(client._id);
+        const coaData = res.data.data || [];
+        setCategories(coaData.map((account: any) => 
+          account["Accnt. #"] 
+            ? `${account["Accnt. #"]} - ${account.Account}` 
+            : account.Account
+        ));
+      } else {
+        // Fallback to regular categories if account type is not specified
+        const res = await categoriesAPI.getCategories();
+        setCategories(res.data.map((c: any) => c.name));
+      }
+    } catch (err: any) {
+      console.error('Failed to load categories:', err);
+      toast({ 
+        title: 'Error', 
+        description: `Failed to load categories for ${client.account_type} client`, 
+        variant: 'destructive' 
+      });
+      // Fallback to empty categories
+      setCategories([]);
+    } finally {
+      setCategoriesLoading(false);
+    }
+  };
 
   const filteredRules = rules.filter(rule =>
     rule.vendorContains.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -68,22 +128,22 @@ export const Rules = () => {
   );
 
   const handleAddRule = async () => {
-    if (!newRule.vendorContains || !newRule.mappedCategory) {
+    if (!newRule.vendorContains || !newRule.mappedCategory || !selectedClient) {
       toast({
         title: "Invalid input",
-        description: "Please fill in all fields.",
+        description: "Please fill in all fields and select a client.",
         variant: "destructive"
       });
       return;
     }
     try {
       const res = await rulesAPI.createRule({
-        client_id: user.user_id,
+        client_id: selectedClient._id,
         vendor_contains: newRule.vendorContains,
         map_to_account: newRule.mappedCategory
       });
       // Refetch rules after add
-      rulesAPI.getRules(user.user_id).then(res => {
+      rulesAPI.getRules(selectedClient._id).then(res => {
         setRules(res.data.map((r: any) => ({
           id: r.rule_id,
           vendorContains: r.vendor_contains,
@@ -114,7 +174,7 @@ export const Rules = () => {
         active: editingRule.enabled
       });
       // Refetch rules after edit
-      rulesAPI.getRules(user.user_id).then(res => {
+      rulesAPI.getRules(selectedClient._id).then(res => {
         setRules(res.data.map((r: any) => ({
           id: r.rule_id,
           vendorContains: r.vendor_contains,
@@ -141,7 +201,7 @@ export const Rules = () => {
       if (!rule) return;
       await rulesAPI.updateRule(id, { active: enabled });
       // Refetch rules after toggle
-      rulesAPI.getRules(user.user_id).then(res => {
+      rulesAPI.getRules(selectedClient._id).then(res => {
         setRules(res.data.map((r: any) => ({
           id: r.rule_id,
           vendorContains: r.vendor_contains,
@@ -174,7 +234,7 @@ export const Rules = () => {
         
         <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
           <DialogTrigger asChild>
-            <Button>
+            <Button disabled={!selectedClient}>
               <Plus className="h-4 w-4 mr-2" />
               Add New Rule
             </Button>
@@ -202,9 +262,16 @@ export const Rules = () => {
                 <Select 
                   value={newRule.mappedCategory} 
                   onValueChange={(value) => setNewRule(prev => ({ ...prev, mappedCategory: value }))}
+                  disabled={categoriesLoading || categories.length === 0}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
+                    <SelectValue placeholder={
+                      categoriesLoading 
+                        ? "Loading categories..." 
+                        : categories.length === 0 
+                          ? "No categories available" 
+                          : "Select category"
+                    } />
                   </SelectTrigger>
                   <SelectContent>
                     {categories.map(category => (
@@ -214,6 +281,11 @@ export const Rules = () => {
                     ))}
                   </SelectContent>
                 </Select>
+                {selectedClient?.account_type && (
+                  <div className="text-xs text-muted-foreground">
+                    Categories from {selectedClient.account_type === 'online' ? 'QuickBooks Online' : 'uploaded COA'}
+                  </div>
+                )}
               </div>
               
               <div className="flex justify-end space-x-2">
@@ -228,6 +300,74 @@ export const Rules = () => {
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* Client Selection */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Select Client</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-4">
+            <div className="flex-1">
+              <Label htmlFor="client-select">Client</Label>
+              <Select
+                value={selectedClient?._id || ''}
+                onValueChange={(value) => {
+                  const client = clients.find(c => c._id === value);
+                  setSelectedClient(client || null);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a client..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {clients.map((client) => (
+                    <SelectItem key={client._id} value={client._id}>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{client.name}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {client.account_type === 'online' ? 'QuickBooks Online' : 'QuickBooks Desktop'}
+                        </span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {selectedClient && (
+              <div className="flex flex-col gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => loadCategoriesForClient(selectedClient)}
+                  disabled={categoriesLoading}
+                >
+                  <RefreshCw className={`h-4 w-4 mr-2 ${categoriesLoading ? 'animate-spin' : ''}`} />
+                  Refresh Categories
+                </Button>
+                <div className="text-xs text-muted-foreground">
+                  {categoriesLoading ? 'Loading...' : `${categories.length} categories loaded`}
+                </div>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {!selectedClient ? (
+        <Card>
+          <CardContent className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <h3 className="text-lg font-medium text-muted-foreground mb-2">No Client Selected</h3>
+              <p className="text-muted-foreground">
+                Please select a client above to view and manage rules.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -393,9 +533,16 @@ export const Rules = () => {
                   onValueChange={(value) => setEditingRule(prev =>
                     prev ? { ...prev, mappedCategory: value } : null
                   )}
+                  disabled={categoriesLoading || categories.length === 0}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
+                    <SelectValue placeholder={
+                      categoriesLoading 
+                        ? "Loading categories..." 
+                        : categories.length === 0 
+                          ? "No categories available" 
+                          : "Select category"
+                    } />
                   </SelectTrigger>
                   <SelectContent>
                     {categories.map(category => (
@@ -405,6 +552,11 @@ export const Rules = () => {
                     ))}
                   </SelectContent>
                 </Select>
+                {selectedClient?.account_type && (
+                  <div className="text-xs text-muted-foreground">
+                    Categories from {selectedClient.account_type === 'online' ? 'QuickBooks Online' : 'uploaded COA'}
+                  </div>
+                )}
               </div>
               
               <div className="flex justify-end space-x-2">
@@ -419,6 +571,8 @@ export const Rules = () => {
           )}
         </DialogContent>
       </Dialog>
+        </>
+      )}
     </div>
   );
 };

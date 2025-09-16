@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useNavigate } from 'react-router-dom';
 import { FileText, Clock, CheckCircle, AlertCircle, Download, Eye, Trash2, RotateCcw } from 'lucide-react';
 import { UserManagement } from '@/components/UserManagement';
+import { useToast } from '@/hooks/use-toast';
 
 interface Upload {
   id: string;
@@ -38,32 +39,48 @@ interface SyncHistory {
 export const Dashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { toast } = useToast();
   const [uploadsSearch, setUploadsSearch] = useState('');
   const [syncSearch, setSyncSearch] = useState('');
   const [uploads, setUploads] = useState<any[]>([]);
   const [pendingApprovals, setPendingApprovals] = useState<any[]>([]);
   const [syncHistory, setSyncHistory] = useState<any[]>([]);
+  const [dashboardData, setDashboardData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [uploadsRes, pendingRes, syncRes] = await Promise.all([
-          dashboardAPI.getUploads(),
-          dashboardAPI.getPendingApprovals(),
-          dashboardAPI.getSyncHistory(),
-        ]);
-        setUploads(uploadsRes.data);
-        setPendingApprovals(pendingRes.data);
-        setSyncHistory(syncRes.data);
-      } catch (err) {
-        // handle error, optionally show toast
+        // Try new unified dashboard API first, fallback to legacy APIs
+        try {
+          const dashboardRes = await dashboardAPI.getDashboard();
+          setDashboardData(dashboardRes.data);
+          setUploads(dashboardRes.data.recent_uploads || []);
+        } catch (dashboardErr) {
+          console.warn('Unified dashboard API not available, falling back to legacy endpoints');
+          // Fallback to legacy endpoints
+          const [uploadsRes, pendingRes, syncRes] = await Promise.all([
+            dashboardAPI.getUploads(),
+            dashboardAPI.getPendingApprovals(),
+            dashboardAPI.getSyncHistory(),
+          ]);
+          setUploads(uploadsRes.data);
+          setPendingApprovals(pendingRes.data);
+          setSyncHistory(syncRes.data);
+        }
+      } catch (err: any) {
+        console.error('Dashboard fetch error:', err);
+        toast({
+          title: 'Error',
+          description: 'Failed to load dashboard data',
+          variant: 'destructive'
+        });
       }
       setLoading(false);
     };
     fetchData();
-  }, []);
+  }, [toast]);
 
   // Filtered data for search
   const filteredUploads = uploads.filter(upload =>
