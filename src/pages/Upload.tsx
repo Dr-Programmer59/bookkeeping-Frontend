@@ -91,7 +91,7 @@ export const Upload: React.FC<UploadProps> = ({ onUploadSuccess }) => {
   const detectClientFromFilename = (filename: string): string => {
     const lowerName = filename.toLowerCase();
     const detected = clients.find((client: any) => 
-      lowerName.includes(client.name.toLowerCase().split(' ')[0])
+      client.name && lowerName.includes(client.name.toLowerCase().split(' ')[0])
     );
     return detected ? detected.name : '';
   };

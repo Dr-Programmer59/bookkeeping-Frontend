@@ -296,11 +296,15 @@ const Clients: React.FC = () => {
 
   // Search state for clients
   const [clientSearch, setClientSearch] = useState('');
-  const filteredClients = clients.filter(client =>
-    client.name?.toLowerCase().includes(clientSearch.toLowerCase()) ||
-    client.client_number?.toString().includes(clientSearch) ||
-    client.account_type?.toLowerCase().includes(clientSearch.toLowerCase())
-  );
+  const filteredClients = clients.filter(client => {
+    if (!clientSearch) return true;
+    const searchLower = clientSearch.toLowerCase();
+    return (
+      client.name?.toLowerCase().includes(searchLower) ||
+      client.client_number?.toString().includes(clientSearch) ||
+      client.account_type?.toLowerCase().includes(searchLower)
+    );
+  });
 
   return (
     <div className="p-4 md:p-6 space-y-6">

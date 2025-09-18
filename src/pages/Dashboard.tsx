@@ -83,14 +83,20 @@ export const Dashboard = () => {
   }, [toast]);
 
   // Filtered data for search
-  const filteredUploads = uploads.filter(upload =>
-    upload.client?.toLowerCase().includes(uploadsSearch.toLowerCase()) ||
-    upload.uploaded_by?.toLowerCase().includes(uploadsSearch.toLowerCase())
-  );
+  const filteredUploads = uploads.filter(upload => {
+    if (!uploadsSearch) return true;
+    const searchLower = uploadsSearch.toLowerCase();
+    return (
+      upload.client?.toLowerCase().includes(searchLower) ||
+      upload.uploaded_by?.toLowerCase().includes(searchLower)
+    );
+  });
 
-  const filteredSyncHistory = syncHistory.filter(sync =>
-    sync.client?.toLowerCase().includes(syncSearch.toLowerCase())
-  );
+  const filteredSyncHistory = syncHistory.filter(sync => {
+    if (!syncSearch) return true;
+    const searchLower = syncSearch.toLowerCase();
+    return sync.client?.toLowerCase().includes(searchLower);
+  });
 
   const getStatusColor = (status: string) => {
     switch (status) {
