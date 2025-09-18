@@ -294,10 +294,25 @@ const Clients: React.FC = () => {
     }
   };
 
+  // Search state for clients
+  const [clientSearch, setClientSearch] = useState('');
+  const filteredClients = clients.filter(client =>
+    client.name?.toLowerCase().includes(clientSearch.toLowerCase()) ||
+    client.client_number?.toString().includes(clientSearch) ||
+    client.account_type?.toLowerCase().includes(clientSearch.toLowerCase())
+  );
+
   return (
     <div className="p-4 md:p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
         <h2 className="text-2xl md:text-3xl font-bold">Clients</h2>
+        <div className="max-w-xs w-full md:ml-4">
+          <Input
+            placeholder="Search clients by name, number, or type..."
+            value={clientSearch}
+            onChange={e => setClientSearch(e.target.value)}
+          />
+        </div>
       </div>
 
       {/* Add/Edit Client Form */}
@@ -439,61 +454,69 @@ const Clients: React.FC = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {clients.map(client => (
-                <TableRow key={client._id}>
-                  <TableCell className="font-medium">{client.name}</TableCell>
-                  <TableCell>{client.client_number}</TableCell>
-                  <TableCell>{getAccountTypeBadge(client.account_type || 'online')}</TableCell>
-                  <TableCell>{getCoaStatusBadge(client)}</TableCell>
-                  <TableCell>
-                    {client.created_at ? new Date(client.created_at).toLocaleDateString() : '-'}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      <Button size="sm" variant="outline" onClick={() => handleEdit(client)}>
-                        Edit
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="destructive" 
-                        onClick={() => handleDelete(client._id)}
-                      >
-                        Delete
-                      </Button>
-                      {client.account_type === 'online' ? (
-                        <Button 
-                          size="sm" 
-                          variant="secondary" 
-                          onClick={() => setShowQboClientId(client._id)}
-                        >
-                          QuickBooks
-                        </Button>
-                      ) : (
-                        <div className="flex gap-1">
-                          <Button 
-                            size="sm" 
-                            variant={coaStatuses[client._id]?.has_csv_uploaded ? "outline" : "secondary"}
-                            onClick={() => handleCoaUpload(client._id)}
-                          >
-                            <FileText className="w-3 h-3 mr-1" />
-                            {coaStatuses[client._id]?.has_csv_uploaded ? 'Replace COA' : 'Upload COA'}
-                          </Button>
-                          {coaStatuses[client._id]?.has_csv_uploaded && (
-                            <Button 
-                              size="sm" 
-                              variant="ghost" 
-                              onClick={() => refreshCoaStatus(client._id)}
-                              title="Refresh COA Status"
-                            >
-                              <RotateCcw className="w-3 h-3" />
-                            </Button>
-                          )}
-                        </div>
-                      )}
-                    </div>
+              {filteredClients.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center text-muted-foreground">
+                    No clients found.
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                filteredClients.map(client => (
+                  <TableRow key={client._id}>
+                    <TableCell className="font-medium">{client.name}</TableCell>
+                    <TableCell>{client.client_number}</TableCell>
+                    <TableCell>{getAccountTypeBadge(client.account_type || 'online')}</TableCell>
+                    <TableCell>{getCoaStatusBadge(client)}</TableCell>
+                    <TableCell>
+                      {client.created_at ? new Date(client.created_at).toLocaleDateString() : '-'}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        <Button size="sm" variant="outline" onClick={() => handleEdit(client)}>
+                          Edit
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="destructive" 
+                          onClick={() => handleDelete(client._id)}
+                        >
+                          Delete
+                        </Button>
+                        {client.account_type === 'online' ? (
+                          <Button 
+                            size="sm" 
+                            variant="secondary" 
+                            onClick={() => setShowQboClientId(client._id)}
+                          >
+                            QuickBooks
+                          </Button>
+                        ) : (
+                          <div className="flex gap-1">
+                            <Button 
+                              size="sm" 
+                              variant={coaStatuses[client._id]?.has_csv_uploaded ? "outline" : "secondary"}
+                              onClick={() => handleCoaUpload(client._id)}
+                            >
+                              <FileText className="w-3 h-3 mr-1" />
+                              {coaStatuses[client._id]?.has_csv_uploaded ? 'Replace COA' : 'Upload COA'}
+                            </Button>
+                            {coaStatuses[client._id]?.has_csv_uploaded && (
+                              <Button 
+                                size="sm" 
+                                variant="ghost" 
+                                onClick={() => refreshCoaStatus(client._id)}
+                                title="Refresh COA Status"
+                              >
+                                <RotateCcw className="w-3 h-3" />
+                              </Button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </div>

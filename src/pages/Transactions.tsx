@@ -46,6 +46,12 @@ export const Transactions: React.FC = () => {
   const [iifExporting, setIifExporting] = useState(false);
   const [registerAccountName, setRegisterAccountName] = useState('');
 
+  // Search state for clients
+  const [clientSearch, setClientSearch] = useState('');
+
+  // Transaction filter states
+  const [transactionFilter, setTransactionFilter] = useState<'all' | 'pending' | 'pushed' | 'exported'>('pending');
+
   // Push All Approved Transactions to QuickBooks (single button)
   const handlePushAllApproved = async () => {
     if (!selectedClient) return;
@@ -262,13 +268,14 @@ export const Transactions: React.FC = () => {
 
     setIifExporting(true);
     try {
-      // Get all transaction IDs
-      const transactionIds = transactions.map(tx => tx.transaction_id);
+      // Get pending transaction IDs (not exported to IIF yet)
+      const pendingTransactions = transactions.filter(tx => !tx.iif_exported);
+      const transactionIds = pendingTransactions.map(tx => tx.transaction_id);
       
       if (transactionIds.length === 0) {
         toast({
-          title: 'No Transactions',
-          description: 'No transactions available to export.',
+          title: 'No Pending Transactions',
+          description: 'No pending transactions available to export. All transactions have already been exported.',
           variant: 'destructive'
         });
         setIifExporting(false);
@@ -342,11 +349,56 @@ export const Transactions: React.FC = () => {
 
   if (loading) return <div>Loading...</div>;
 
+  // Filter clients based on search
+  const filteredClients = clients.filter(client => {
+    if (!clientSearch) return true; // Show all clients if no search term
+    const searchLower = clientSearch.toLowerCase();
+    return (
+      client.name?.toLowerCase().includes(searchLower) ||
+      client.email?.toLowerCase().includes(searchLower) ||
+      client.phone?.toLowerCase().includes(searchLower)
+    );
+  });
+
+  // Filter transactions based on filter selection
+  const getFilteredTransactions = () => {
+    if (!selectedClient) return [];
+    
+    switch (transactionFilter) {
+      case 'pending':
+        return transactions.filter(tx => 
+          selectedClient.account_type === 'online' 
+            ? !tx.qbo_txn_id 
+            : !tx.iif_exported
+        );
+      case 'pushed':
+        return selectedClient.account_type === 'online' 
+          ? transactions.filter(tx => tx.qbo_txn_id)
+          : [];
+      case 'exported':
+        return selectedClient.account_type === 'desktop' 
+          ? transactions.filter(tx => tx.iif_exported)
+          : [];
+      case 'all':
+      default:
+        return transactions;
+    }
+  };
+
+  const filteredTransactions = getFilteredTransactions();
+
   // First screen: List all clients
   if (!selectedClient) {
     return (
       <div className="space-y-8">
         <h1 className="text-3xl font-bold text-foreground">Clients</h1>
+        <div className="mb-4 max-w-md">
+          <Input
+            placeholder="Search clients by name, email, or phone..."
+            value={clientSearch}
+            onChange={e => setClientSearch(e.target.value)}
+          />
+        </div>
         <Card>
           <CardHeader>
             <CardTitle>Available Clients</CardTitle>
@@ -362,18 +414,26 @@ export const Transactions: React.FC = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {clients.map(client => (
-                  <TableRow key={client._id}>
-                    <TableCell>{client.name}</TableCell>
-                    <TableCell>{client.email}</TableCell>
-                    <TableCell>{client.phone}</TableCell>
-                    <TableCell>
-                      <Button size="sm" onClick={() => setSelectedClient(client)}>
-                        View Transactions
-                      </Button>
+                {filteredClients.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center text-muted-foreground">
+                      No clients found.
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : (
+                  filteredClients.map(client => (
+                    <TableRow key={client._id}>
+                      <TableCell>{client.name}</TableCell>
+                      <TableCell>{client.email}</TableCell>
+                      <TableCell>{client.phone}</TableCell>
+                      <TableCell>
+                        <Button size="sm" onClick={() => setSelectedClient(client)}>
+                          View Transactions
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </CardContent>
@@ -431,15 +491,25 @@ export const Transactions: React.FC = () => {
             <CardTitle>Pending</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{transactions.filter(tx => !tx.approved).length}</span>
+            <span className="text-2xl font-bold">{transactions.filter(tx => 
+              selectedClient?.account_type === 'online' 
+                ? !tx.qbo_txn_id 
+                : !tx.iif_exported
+            ).length}</span>
           </CardContent>
         </Card>
         <Card className="flex-1">
           <CardHeader>
-            <CardTitle>Pushed to QuickBooks</CardTitle>
+            <CardTitle>
+              {selectedClient?.account_type === 'online' ? 'Pushed to QB' : 'Exported to IIF'}
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{transactions.filter(tx => tx.qb_id).length}</span>
+            <span className="text-2xl font-bold">{
+              selectedClient?.account_type === 'online' 
+                ? transactions.filter(tx => tx.qbo_txn_id).length
+                : transactions.filter(tx => tx.iif_exported).length
+            }</span>
           </CardContent>
         </Card>
       </div>
@@ -453,6 +523,45 @@ export const Transactions: React.FC = () => {
           <Button onClick={() => setShowIIFDialog(true)} disabled={iifExporting}>
             <Download className="h-4 w-4 mr-2" />
             {iifExporting ? 'Creating IIF...' : 'Export IIF'}
+          </Button>
+        ) : null}
+      </div>
+      
+      {/* Transaction Filter Buttons */}
+      <div className="flex gap-2 mb-4 flex-wrap">
+        <Button
+          variant={transactionFilter === 'pending' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setTransactionFilter('pending')}
+        >
+          Pending ({transactions.filter(tx => 
+            selectedClient?.account_type === 'online' 
+              ? !tx.qbo_txn_id 
+              : !tx.iif_exported
+          ).length})
+        </Button>
+        <Button
+          variant={transactionFilter === 'all' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setTransactionFilter('all')}
+        >
+          All ({transactions.length})
+        </Button>
+        {selectedClient?.account_type === 'online' ? (
+          <Button
+            variant={transactionFilter === 'pushed' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setTransactionFilter('pushed')}
+          >
+            Pushed to QB ({transactions.filter(tx => tx.qbo_txn_id).length})
+          </Button>
+        ) : selectedClient?.account_type === 'desktop' ? (
+          <Button
+            variant={transactionFilter === 'exported' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setTransactionFilter('exported')}
+          >
+            Exported to IIF ({transactions.filter(tx => tx.iif_exported).length})
           </Button>
         ) : null}
       </div>
@@ -481,15 +590,22 @@ export const Transactions: React.FC = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {transactions.length === 0 ? (
+                {filteredTransactions.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={10} className="text-center text-muted-foreground">
-                      No transactions found for this client.
+                      {transactionFilter === 'pending' 
+                        ? `No pending transactions found for this client.`
+                        : transactionFilter === 'pushed'
+                        ? `No pushed transactions found for this client.`
+                        : transactionFilter === 'exported'
+                        ? `No exported transactions found for this client.`
+                        : `No transactions found for this client.`
+                      }
                     </TableCell>
                   </TableRow>
                 ) : (
-                  // Show all transactions
-                  transactions.map(tx => (
+                  // Show filtered transactions
+                  filteredTransactions.map(tx => (
                     <TableRow key={tx.transaction_id}>
                       <TableCell>{tx.transaction_id}</TableCell>
                       <TableCell>{tx.vendor_name}</TableCell>
@@ -668,10 +784,13 @@ export const Transactions: React.FC = () => {
             
             <div className="bg-muted p-3 rounded-md">
               <p className="text-sm">
-                <strong>Total Transactions:</strong> {transactions.length}
+                <strong>Pending Transactions:</strong> {transactions.filter(tx => !tx.iif_exported).length}
+              </p>
+              <p className="text-sm">
+                <strong>Already Exported:</strong> {transactions.filter(tx => tx.iif_exported).length}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                All transactions will be included in the export.
+                Only pending transactions (not yet exported) will be included in the export.
               </p>
             </div>
           </div>
