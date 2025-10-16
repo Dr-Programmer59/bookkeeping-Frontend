@@ -50,14 +50,14 @@ export const Logs = () => {
   const users = ['All Users', ...Array.from(new Set(logs.map(log => log.userName)))];
 
   const filteredLogs = logs.filter(log => {
-    const matchesSearch = log.details.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         log.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         log.action.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = log.details?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         log.userName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         log.action?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesAction = selectedAction === 'All Actions' || log.action === selectedAction;
     const matchesTargetType = selectedTargetType === 'All Types' || log.targetType === selectedTargetType;
     const matchesUser = selectedUser === 'All Users' || log.userName === selectedUser;
-    const matchesDate = !selectedDate || log.timestamp.startsWith(format(selectedDate, 'yyyy-MM-dd'));
+    const matchesDate = !selectedDate || log.timestamp?.startsWith(format(selectedDate, 'yyyy-MM-dd'));
 
     return matchesSearch && matchesAction && matchesTargetType && matchesUser && matchesDate;
   });

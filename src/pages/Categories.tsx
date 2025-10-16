@@ -5,8 +5,6 @@ import { Input } from '@/components/ui/input';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { useAuth } from '../contexts/AuthContext';
 
-const API_URL = 'http://localhost:4000';
-
 const Categories: React.FC = () => {
   const { user } = useAuth();
   const [categories, setCategories] = useState<any[]>([]);

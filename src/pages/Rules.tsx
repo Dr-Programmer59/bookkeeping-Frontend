@@ -123,8 +123,8 @@ export const Rules = () => {
   };
 
   const filteredRules = rules.filter(rule =>
-    rule.vendorContains.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    rule.mappedCategory.toLowerCase().includes(searchTerm.toLowerCase())
+    rule.vendorContains?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    rule.mappedCategory?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleAddRule = async () => {

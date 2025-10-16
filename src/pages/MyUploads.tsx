@@ -63,8 +63,8 @@ export const MyUploads = () => {
   const userUploads = mockUploads;
   
   const filteredUploads = userUploads.filter(upload =>
-    upload.filename.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    upload.client.toLowerCase().includes(searchTerm.toLowerCase())
+    upload.filename?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    upload.client?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getStatusColor = (status: string) => {
