@@ -62,10 +62,12 @@ export const MyUploads = () => {
   // Filter uploads to show only user's uploads
   const userUploads = mockUploads;
   
-  const filteredUploads = userUploads.filter(upload =>
-    upload.filename?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    upload.client?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredUploads = userUploads.filter(upload => {
+    const filename = typeof upload.filename === 'string' ? upload.filename : '';
+    const client = typeof upload.client === 'string' ? upload.client : '';
+    return filename.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           client.toLowerCase().includes(searchTerm.toLowerCase());
+  });
 
   const getStatusColor = (status: string) => {
     switch (status) {

@@ -122,10 +122,12 @@ export const Rules = () => {
     }
   };
 
-  const filteredRules = rules.filter(rule =>
-    rule.vendorContains?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    rule.mappedCategory?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredRules = rules.filter(rule => {
+    const vendor = typeof rule.vendorContains === 'string' ? rule.vendorContains : '';
+    const category = typeof rule.mappedCategory === 'string' ? rule.mappedCategory : '';
+    return vendor.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           category.toLowerCase().includes(searchTerm.toLowerCase());
+  });
 
   const handleAddRule = async () => {
     if (!newRule.vendorContains || !newRule.mappedCategory || !selectedClient) {
