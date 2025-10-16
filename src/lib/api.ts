@@ -38,7 +38,11 @@ api.interceptors.response.use(
     const originalRequest = error.config;
     
     if (error.response) {
-      console.error('[API] Error response:', error.response.config.url, error.response.status, error.response.data);
+      // Don't log expected 404 for unified dashboard API (uses fallback)
+      const isDashboard404 = error.response.config.url === '/dashboard' && error.response.status === 404;
+      if (!isDashboard404) {
+        console.error('[API] Error response:', error.response.config.url, error.response.status, error.response.data);
+      }
       
       // Handle 401 unauthorized - attempt token refresh
       if (error.response.status === 401 && !originalRequest._retry) {

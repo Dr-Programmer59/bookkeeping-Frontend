@@ -57,8 +57,11 @@ export const Dashboard = () => {
           const dashboardRes = await dashboardAPI.getDashboard();
           setDashboardData(dashboardRes.data);
           setUploads(dashboardRes.data.recent_uploads || []);
-        } catch (dashboardErr) {
-          console.warn('Unified dashboard API not available, falling back to legacy endpoints');
+        } catch (dashboardErr: any) {
+          // Silently fall back to legacy endpoints (404 is expected if unified API not available)
+          if (dashboardErr?.response?.status !== 404) {
+            console.warn('Dashboard API error:', dashboardErr);
+          }
           // Fallback to legacy endpoints
           const [uploadsRes, pendingRes, syncRes] = await Promise.all([
             dashboardAPI.getUploads(),
