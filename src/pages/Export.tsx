@@ -253,7 +253,15 @@ export const Export: React.FC = () => {
                       </TableCell>
                       <TableCell>{new Date(transaction.transaction_date).toLocaleDateString()}</TableCell>
                       <TableCell>{transaction.vendor_name}</TableCell>
-                      <TableCell>${Math.abs(transaction.amount).toFixed(2)}</TableCell>
+                      <TableCell>
+                        {(() => {
+                          const num = Number(transaction.amount);
+                          const isCredit = (!isNaN(num) && num < 0) || (transaction.transaction_type && String(transaction.transaction_type).toLowerCase() === 'credit');
+                          const display = `${isCredit ? '-' : '+'}$${Math.abs(Number(transaction.amount) || 0).toFixed(2)}`;
+                          const colorClass = isCredit ? 'text-destructive' : 'text-success';
+                          return <span className={colorClass}>{display}</span>;
+                        })()}
+                      </TableCell>
                       <TableCell>{transaction.manual_category || transaction.auto_category}</TableCell>
                       <TableCell>
                         <Badge variant={transaction.approved ? 'default' : 'secondary'}>

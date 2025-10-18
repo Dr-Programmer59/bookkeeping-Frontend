@@ -493,7 +493,15 @@ export const Transactions: React.FC = () => {
                     <TableRow key={tx.transaction_id}>
                       <TableCell>{tx.transaction_id}</TableCell>
                       <TableCell>{tx.vendor_name}</TableCell>
-                      <TableCell>{tx.amount}</TableCell>
+                      <TableCell>
+                        {(() => {
+                          const num = Number(tx.amount);
+                          const isCredit = (!isNaN(num) && num < 0) || (tx.transaction_type && String(tx.transaction_type).toLowerCase() === 'credit');
+                          const display = `${isCredit ? '-' : '+'}$${Math.abs(Number(tx.amount) || 0).toFixed(2)}`;
+                          const colorClass = isCredit ? 'text-destructive' : 'text-success';
+                          return <span className={colorClass}>{display}</span>;
+                        })()}
+                      </TableCell>
                       <TableCell>{tx.payment_type}</TableCell>
                       <TableCell>{tx.transaction_type}</TableCell>
                         <TableCell>
